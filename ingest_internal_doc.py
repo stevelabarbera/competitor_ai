@@ -2,7 +2,7 @@ import argparse
 import chromadb
 import os
 from pathlib import Path
-from improved_chunker import chunk_text_with_metadata
+from chunker import chunk_text_with_metadata
 from embedding_config import get_competitor_collection
 import fitz  # PyMuPDF
 from datetime import datetime

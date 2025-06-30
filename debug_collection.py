@@ -1,196 +1,246 @@
 #!/usr/bin/env python3
 """
-Collection Debug and Quality Analysis Tool
-
-This script helps you understand what's in your ChromaDB collection
-and identify potential quality issues with your chunks.
+debug_collection.py - ChromaDB collection health checking and inspection utilities
 """
 
 import chromadb
-from embedding_config import get_competitor_collection
-import argparse
+from pathlib import Path
 from collections import Counter
-import re
+from embedding_config import get_competitor_collection
 
-def analyze_chunk_quality(chunks, metadatas):
-    """Analyze the quality of chunks in the collection."""
-    print("\n" + "="*50)
-    print("📊 CHUNK QUALITY ANALYSIS")
-    print("="*50)
-    
-    # Basic statistics
-    word_counts = [len(chunk.split()) for chunk in chunks]
-    char_counts = [len(chunk) for chunk in chunks]
-    
-    print(f"Total chunks analyzed: {len(chunks)}")
-    print(f"Average words per chunk: {sum(word_counts) / len(word_counts):.1f}")
-    print(f"Average characters per chunk: {sum(char_counts) / len(char_counts):.1f}")
-    print(f"Shortest chunk: {min(word_counts)} words")
-    print(f"Longest chunk: {max(word_counts)} words")
-    
-    # Source distribution
-    sources = [meta.get('source', 'Unknown') for meta in metadatas]
-    source_counts = Counter(sources)
-    
-    print(f"\n📁 SOURCE DISTRIBUTION:")
-    for source, count in source_counts.most_common(10):
-        print(f"  {source}: {count} chunks")
-    
-    # Quality issues detection
-    print(f"\n⚠️  POTENTIAL QUALITY ISSUES:")
-    
-    # Very short chunks
-    short_chunks = [i for i, wc in enumerate(word_counts) if wc < 30]
-    print(f"  Very short chunks (< 30 words): {len(short_chunks)}")
-    
-    # Very long chunks
-    long_chunks = [i for i, wc in enumerate(word_counts) if wc > 800]
-    print(f"  Very long chunks (> 800 words): {len(long_chunks)}")
-    
-    # Boilerplate detection
-    boilerplate_keywords = [
-        "terms and conditions", "privacy policy", "copyright",
-        "all rights reserved", "disclaimer", "legal notice",
-        "cookie policy", "end user license agreement"
-    ]
-    
-    boilerplate_chunks = []
-    for i, chunk in enumerate(chunks):
-        chunk_lower = chunk.lower()
-        if any(keyword in chunk_lower for keyword in boilerplate_keywords):
-            boilerplate_chunks.append(i)
-    
-    print(f"  Potential boilerplate chunks: {len(boilerplate_chunks)}")
-    
-    # Empty or near-empty chunks
-    empty_chunks = [i for i, chunk in enumerate(chunks) if len(chunk.strip()) < 50]
-    print(f"  Nearly empty chunks (< 50 chars): {len(empty_chunks)}")
-    
-    return {
-        'short_chunks': short_chunks,
-        'long_chunks': long_chunks,
-        'boilerplate_chunks': boilerplate_chunks,
-        'empty_chunks': empty_chunks,
-        'source_counts': source_counts
-    }
+# Configuration
+ROOT_DIR = Path(__file__).resolve().parent
+CHROMA_DB_PATH = ROOT_DIR / "chroma_db"
 
-def show_sample_chunks(chunks, metadatas, indices, title, max_samples=3):
-    """Show sample chunks from given indices."""
-    print(f"\n{title}")
-    print("-" * len(title))
+def safe_metadata_extract(metadatas, default_source="Unknown"):
+    """Safely extract metadata, handling None values and missing keys"""
+    sources = []
+    issues = []
     
-    for i, idx in enumerate(indices[:max_samples]):
-        if i >= max_samples:
-            break
-        print(f"\n[Sample {i+1}] Source: {metadatas[idx].get('source', 'Unknown')}")
-        print(f"Words: {len(chunks[idx].split())}")
-        print(f"Content: {chunks[idx][:200]}{'...' if len(chunks[idx]) > 200 else ''}")
+    for i, meta in enumerate(metadatas):
+        if meta is None:
+            sources.append("No Metadata")
+            issues.append(f"Chunk {i}: None metadata")
+        elif not isinstance(meta, dict):
+            sources.append("Invalid Metadata")
+            issues.append(f"Chunk {i}: metadata is {type(meta)}")
+        else:
+            source = meta.get('source', default_source)
+            if not source or source.strip() == "":
+                source = "Empty Source"
+                issues.append(f"Chunk {i}: empty source field")
+            sources.append(source)
+    
+    return sources, issues
 
-def search_and_analyze(collection, query, n_results=10):
-    """Perform a search and analyze the results."""
-    print(f"\n🔍 SEARCH ANALYSIS FOR: '{query}'")
-    print("="*50)
-    
-    results = collection.query(query_texts=[query], n_results=n_results)
-    docs = results.get("documents", [[]])[0]
-    metadatas = results.get("metadatas", [[]])[0]
-    distances = results.get("distances", [[]])[0]
-    
-    if not docs:
-        print("No results found!")
-        return
-    
-    print(f"Found {len(docs)} results")
-    
-    for i, (doc, meta, distance) in enumerate(zip(docs, metadatas, distances)):
-        print(f"\n--- Result {i+1} (Distance: {distance:.3f}) ---")
-        print(f"Source: {meta.get('source', 'Unknown')}")
-        print(f"Words: {len(doc.split())}")
-        print(f"Preview: {doc[:150]}...")
-        
-        # Check for competitive intelligence keywords
-        competitive_keywords = [
-            'pricing', 'price', 'cost', 'competitor', 'vs', 'versus', 
-            'comparison', 'features', 'advantage', 'disadvantage',
-            'market share', 'license', 'licensing'
-        ]
-        
-        found_keywords = [kw for kw in competitive_keywords if kw.lower() in doc.lower()]
-        if found_keywords:
-            print(f"🎯 Competitive keywords found: {', '.join(found_keywords)}")
-
-def main():
-    parser = argparse.ArgumentParser(description="Debug ChromaDB collection quality")
-    parser.add_argument("--search", type=str, help="Test search query")
-    parser.add_argument("--limit", type=int, default=100, help="Max chunks to analyze")
-    parser.add_argument("--show-samples", action="store_true", help="Show sample problematic chunks")
-    args = parser.parse_args()
+def validate_collection_health(collection, sample_size=20):  # Much smaller default
+    """Run a lightweight health check on ChromaDB collection"""
+    print("🔍 Running collection health check...")
     
     try:
-        # Connect to collection
-        client = chromadb.PersistentClient(path="./chroma_db")
-        collection = get_competitor_collection(client)
+        # Get collection info first - this should be fast
+        print("📊 Getting collection count...")
+        count = collection.count()
+        print(f"📊 Total documents in collection: {count}")
         
-        # Get collection stats
-        total_count = collection.count()
-        print(f"📊 COLLECTION OVERVIEW")
-        print(f"Total chunks in collection: {total_count}")
+        if count == 0:
+            print("❌ Collection is empty!")
+            return None
         
-        # Get sample of data for analysis
-        limit = min(args.limit, total_count)
-        sample_data = collection.get(limit=limit)
+        # Use much smaller sample for memory-constrained systems
+        sample_size = min(sample_size, count, 20)  # Cap at 20 documents
+        print(f"🔬 Fetching small sample of {sample_size} documents...")
+        sample = collection.get(limit=sample_size)
+        docs = sample.get('documents', [])
+        metadatas = sample.get('metadatas', [])
+        ids = sample.get('ids', [])
         
-        chunks = sample_data.get("documents", [])
-        metadatas = sample_data.get("metadatas", [])
+        print(f"🔬 Analyzing sample of {len(docs)} documents...")
         
-        if not chunks:
-            print("❌ No documents found in collection!")
-            return
+        # Health metrics
+        none_meta_count = sum(1 for meta in metadatas if meta is None)
+        empty_docs = sum(1 for doc in docs if not doc or len(doc.strip()) < 10)
         
-        # Analyze quality
-        quality_issues = analyze_chunk_quality(chunks, metadatas)
+        # Check document lengths
+        doc_lengths = [len(doc.split()) for doc in docs if doc]
+        if doc_lengths:
+            min_length = min(doc_lengths)
+            max_length = max(doc_lengths)
+            avg_length = sum(doc_lengths) / len(doc_lengths)
+            print(f"📏 Document lengths - Min: {min_length}, Max: {max_length}, Avg: {avg_length:.1f} words")
         
-        # Show samples if requested
-        if args.show_samples:
-            if quality_issues['short_chunks']:
-                show_sample_chunks(chunks, metadatas, quality_issues['short_chunks'], 
-                                 "🔸 SAMPLE SHORT CHUNKS:")
-            
-            if quality_issues['boilerplate_chunks']:
-                show_sample_chunks(chunks, metadatas, quality_issues['boilerplate_chunks'], 
-                                 "🔸 SAMPLE BOILERPLATE CHUNKS:")
+        # Source analysis
+        sources, issues = safe_metadata_extract(metadatas)
+        source_counts = Counter(sources)
         
-        # Test search if provided
-        if args.search:
-            search_and_analyze(collection, args.search)
+        print(f"\n📋 Health Summary:")
+        print(f"  ❌ Documents with None metadata: {none_meta_count}")
+        print(f"  📝 Empty/tiny documents: {empty_docs}")
+        print(f"  🏷️ Metadata issues found: {len(issues)}")
         
-        # Recommendations
-        print(f"\n💡 RECOMMENDATIONS:")
-        print("="*30)
+        print(f"\n📂 Source Distribution:")
+        for source, count in source_counts.most_common(10):
+            print(f"  {source}: {count}")
         
-        if len(quality_issues['short_chunks']) > len(chunks) * 0.1:
-            print("• Consider increasing minimum chunk size during ingestion")
+        # Show sample issues
+        if issues:
+            print(f"\n⚠️  Sample Issues:")
+            for issue in issues[:5]:
+                print(f"  - {issue}")
         
-        if len(quality_issues['boilerplate_chunks']) > 0:
-            print("• Consider filtering out boilerplate content during ingestion")
+        # Show sample content
+        print(f"\n📄 Sample Documents:")
+        for i in range(min(3, len(docs))):
+            doc = docs[i]
+            meta = metadatas[i]
+            source = "None" if not meta else meta.get('source', 'Missing')
+            word_count = len(doc.split()) if doc else 0
+            print(f"  [{source}] ({word_count} words): {doc[:150]}...")
         
-        if len(quality_issues['empty_chunks']) > 0:
-            print("• Review document preprocessing to avoid empty chunks")
-        
-        # Source-specific recommendations
-        output_chunks = sum(1 for source in quality_issues['source_counts'] if 'output' in source.lower())
-        total_chunks = len(chunks)
-        
-        if output_chunks > total_chunks * 0.5:
-            print("• High proportion of 'output' folder content - consider filtering for quality")
-        
-        print("\n🎯 SEARCH OPTIMIZATION TIPS:")
-        print("• Use source filters to focus on high-quality documents")
-        print("• Try different search modes (semantic vs keyword vs hybrid)")
-        print("• Consider using the reranking feature for better relevance")
+        return {
+            'total_docs': count,
+            'sample_size': len(docs),
+            'none_metadata': none_meta_count,
+            'empty_docs': empty_docs,
+            'metadata_issues': len(issues),
+            'source_distribution': dict(source_counts),
+            'doc_length_stats': {
+                'min': min(doc_lengths) if doc_lengths else 0,
+                'max': max(doc_lengths) if doc_lengths else 0,
+                'avg': sum(doc_lengths) / len(doc_lengths) if doc_lengths else 0
+            }
+        }
         
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"❌ Health check failed: {e}")
+        return None
+
+def inspect_specific_source(collection, source_name, limit=10):
+    """Inspect documents from a specific source"""
+    print(f"🔍 Inspecting documents from source: {source_name}")
+    
+    try:
+        results = collection.get(
+            where={"source": source_name},
+            limit=limit
+        )
+        
+        docs = results.get('documents', [])
+        metadatas = results.get('metadatas', [])
+        
+        if not docs:
+            print(f"❌ No documents found for source: {source_name}")
+            return
+        
+        print(f"📊 Found {len(docs)} documents")
+        
+        for i, (doc, meta) in enumerate(zip(docs, metadatas)):
+            word_count = len(doc.split()) if doc else 0
+            print(f"\n📄 Document {i+1}:")
+            print(f"  Metadata: {meta}")
+            print(f"  Length: {word_count} words")
+            print(f"  Content: {doc[:200]}...")
+            
+    except Exception as e:
+        print(f"❌ Source inspection failed: {e}")
+
+def find_duplicate_content(collection, sample_size=50):
+    """Find potential duplicate content in the collection"""
+    print("🔍 Scanning for duplicate content...")
+    
+    try:
+        sample = collection.get(limit=sample_size)
+        docs = sample.get('documents', [])
+        
+        # Simple duplicate detection based on first 100 characters
+        content_fingerprints = {}
+        duplicates = []
+        
+        for i, doc in enumerate(docs):
+            if doc:
+                fingerprint = doc[:100].strip()
+                if fingerprint in content_fingerprints:
+                    duplicates.append((i, content_fingerprints[fingerprint], fingerprint))
+                else:
+                    content_fingerprints[fingerprint] = i
+        
+        if duplicates:
+            print(f"⚠️  Found {len(duplicates)} potential duplicates:")
+            for new_idx, orig_idx, fingerprint in duplicates[:5]:
+                print(f"  Doc {new_idx} matches Doc {orig_idx}: {fingerprint[:50]}...")
+        else:
+            print("✅ No obvious duplicates found")
+            
+    except Exception as e:
+        print(f"❌ Duplicate scan failed: {e}")
+
+def test_search_quality(collection, test_queries=None):
+    """Test search quality with sample queries"""
+    if test_queries is None:
+        test_queries = [
+            "cybersecurity features",
+            "pricing model",
+            "threat detection",
+            "competitive advantages"
+        ]
+    
+    print("🧪 Testing search quality...")
+    
+    for query in test_queries:
+        print(f"\n🔍 Query: '{query}'")
+        try:
+            results = collection.query(
+                query_texts=[query],
+                n_results=3
+            )
+            
+            docs = results.get('documents', [[]])[0]
+            metadatas = results.get('metadatas', [[]])[0]
+            
+            if docs:
+                for i, (doc, meta) in enumerate(zip(docs, metadatas)):
+                    source = meta.get('source', 'Unknown') if meta else 'No metadata'
+                    relevance_score = "High" if query.lower() in doc.lower() else "Low"
+                    print(f"  {i+1}. [{source}] {relevance_score}: {doc[:100]}...")
+            else:
+                print("  ❌ No results found")
+                
+        except Exception as e:
+            print(f"  ❌ Search failed: {e}")
 
 if __name__ == "__main__":
-    main()
+    # Initialize ChromaDB client and collection
+    print("🚀 Starting lightweight debug tool...")
+    print("💾 Memory-optimized for 8GB systems")
+    
+    try:
+        client = chromadb.PersistentClient(path=str(CHROMA_DB_PATH))
+        print("✅ ChromaDB client initialized")
+        
+        collection = get_competitor_collection(client)
+        print("✅ Collection loaded")
+        
+        print("=" * 60)
+        print("🔧 ChromaDB Collection Debug Tool (Lightweight)")
+        print("=" * 60)
+        
+        # Run health check with small sample
+        health = validate_collection_health(collection, sample_size=10)
+        
+        if health and health['total_docs'] > 0:
+            print("\n" + "=" * 40)
+            print("🎯 QUICK ASSESSMENT")
+            print("=" * 40)
+            
+            issues = health['none_metadata'] + health['empty_docs'] + health['metadata_issues']
+            if issues == 0:
+                print("✅ Sample looks healthy!")
+            else:
+                print(f"❌ Found {issues} issues in {health['sample_size']} documents")
+                print("🔧 Consider running fixes and re-ingestion")
+    
+    except Exception as e:
+        print(f"❌ Debug tool failed: {e}")
+        print("💡 Try: Kill the process and run 'python debug_collection_mini.py'")
+        
+    print("\n💾 Debug complete - memory usage should be low now")
