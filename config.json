@@ -1,0 +1,21 @@
+{
+    "search_terms": [
+        "vintage camera",
+        "mechanical keyboard",
+        "vinyl records"
+    ],
+    "location": "New York, NY",
+    "max_price": 200,
+    "min_price": 0,
+    "radius_miles": 25,
+    "check_interval_minutes": 15,
+    "email": {
+        "enabled": false,
+        "smtp_server": "smtp.gmail.com",
+        "smtp_port": 587,
+        "sender_email": "your-email@gmail.com",
+        "sender_password": "your-app-password",
+        "recipient_email": "your-email@gmail.com"
+    },
+    "desktop_notifications": true
+}
