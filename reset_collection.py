@@ -21,19 +21,3 @@ collection = client.get_or_create_collection(
 )
 print("✅ Recreated collection with correct embedding function")
 
-import chromadb
-from chromadb.config import Settings
-from chromadb.utils.embedding_functions import OllamaEmbeddingFunction
-
-client = chromadb.PersistentClient(path="./chroma_db")
-collection_name = "competitor_docs"
-
-try:
-    client.delete_collection(collection_name)
-    print(f"🗑️ Deleted old collection: {collection_name}")
-except Exception:
-    print(f"ℹ️ Collection {collection_name} did not exist. Continuing...")
-
-embedding_function = OllamaEmbeddingFunction(model_name="nomic-embed-text")
-client.create_collection(name=collection_name, embedding_function=embedding_function)
-print(f"✅ Recreated collection: {collection_name}")
