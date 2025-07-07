@@ -1,11 +1,15 @@
-import argparse
-import chromadb
 import os
+import chromadb
+import argparse
+import fitz  # PyMuPDF
 from pathlib import Path
 from chunker import chunk_text_with_metadata
 from embedding_config import get_competitor_collection
-import fitz  # PyMuPDF
 from datetime import datetime
+
+
+
+os.environ['ONNX_DISABLE_COREML'] = '1'
 
 # ----------------------
 # CLI argument parsing
@@ -251,6 +255,33 @@ def flush_batch(collection, batch):
                 )
             except Exception as individual_error:
                 print(f"    ❌ Failed individual item {item['id']}: {individual_error}")
+
+# In your ingestion pipeline (ingest_internal_doc.py)
+def process_document(text, filename):
+    # Get chunks as list
+    chunks = chunk_text_smart(text, chunk_size=512, overlap=64)
+    
+    # Process each chunk individually
+    for i, chunk in enumerate(chunks):
+        # Validate chunk quality
+        if len(chunk.strip()) < 50:  # Skip very short chunks
+            continue
+            
+        # Create metadata for this chunk
+        metadata = {
+            'source': filename,
+            'chunk_index': i,
+            'total_chunks': len(chunks),
+            'word_count': len(chunk.split())
+        }
+        
+        # Validate metadata isn't None
+        if metadata is None:
+            print(f"Warning: None metadata for chunk {i} in {filename}")
+            continue
+            
+        # Add to your database/collection
+        add_to_chroma(chunk, metadata)
 
 # ----------------------
 # Entry point

@@ -1,10 +1,10 @@
 # health_check.py
-from search_engine import search_semantic, search_keyword
+from search_engine import search_semantic_enhanced, search_keyword_enhanced
 
 def check_semantic():
     print("Checking Semantic Search...")
     try:
-        hits = search_semantic("test", n_results=2)
+        hits = search_semantic_enhanced("asm", n_results=2)
         if not hits:
             print("❌ Semantic search returned NO results. Is ChromaDB populated?")
             return False
@@ -17,7 +17,7 @@ def check_semantic():
 def check_keyword():
     print("Checking Keyword Search...")
     try:
-        hits = search_keyword("test", n_results=2)
+        hits = search_keyword_enhanced("asm", n_results=2)
         if not hits:
             print("❌ Keyword search returned NO results. Is Whoosh index built?")
             return False
