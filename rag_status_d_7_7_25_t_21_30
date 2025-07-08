@@ -1,0 +1,71 @@
+# RAG System Status - Competitive Intelligence 7-7-25|200:42
+
+## 🎯 Current State
+- **Working**: ChromaDB ingestion with enhanced metadata
+- **Problem**: Documents merged together, losing company context
+- **Goal**: Clean company-specific search results
+
+## 📁 Architecture
+```
+├── internal_data/           # High-priority docs
+├── output/                 # Web crawler results  
+├── search_engine.py        # Semantic + keyword search
+├── ingest_internal_doc.py  # Document ingestion
+├── chroma_db/             # Vector storage
+└── whoosh_index/          # Keyword index
+```
+
+## 🚨 Current Issue: Context Loss
+**Problem**: All documents mixed together, can't isolate by company
+**Impact**: Search returns generic results instead of company-specific intel
+
+## 💡 Proposed Solution: Company Tagging System
+
+### In Content Files:
+```
+Company_Names: Tenable,Tenable.com,Tenable_com,Tenablelabs
+Company_Names: Disney,ESPN,Pixar,Lucasfilm,Marvel
+Company_Names: CrowdStrike,Crowdstrike.com,Falcon_Platform
+```
+
+### Benefits:
+- ✅ **Accurate mapping** - No domain parsing guesswork
+- ✅ **Multiple aliases** - Disney=ESPN=Pixar handled properly  
+- ✅ **Manual control** - We define the relationships
+- ✅ **Search filtering** - Query by specific competitor
+
+### Implementation Plan:
+1. **Parse company tags** from content files during ingestion
+2. **Add company metadata** to chunks (e.g., `{"primary_company": "Disney", "aliases": ["ESPN", "Pixar"]}`)
+3. **Filter searches** by company parameter
+4. **Maintain company mapping** in separate config file
+
+## 🔧 Quick Tests Available
+- **Inspector script**: `python db_inspector.py` - See current data
+- **Search test**: Test semantic queries
+- **Metadata check**: Verify chunk quality
+
+## 🎯 Next Steps
+1. **Design company tag parser** - Extract Company_Names from content
+	- add metadata like {"primary_company": "Tenable", "all_aliases": ["Tenable", "Tenable.com", "Tenable_com", "Tenablelabs"]} during digestion of parsing 'output'&'internal_data'
+	- Enable filtered search - search("pricing", company="Tenable") returns only Tenable content
+
+
+2. **Update ingestion** - Add company metadata to chunks  
+3. **Add search filters** - Enable company-specific queries
+4. **Test isolation** - Verify clean company separation
+
+## 📊 Success Metrics
+- [ ] Search "Tenable pricing" returns only Tenable docs
+- [ ] Company aliases properly mapped (Disney query finds ESPN content)
+- [ ] No cross-contamination between competitors
+- [ ] Fast, relevant, company-specific results
+
+## Be aware of gotchas!
+1. content text for each company is currently being merged all into one document losing context
+2. I noticed logic somewhere where we were skipping content that was less than 100 characters long which is concerning.Whois to say that a hundred characters of data isn't pretty important?
+3. as we build functionality we try to make sure that we're not losing something already there.Should be greater then or at least equal to unless clearly documented.
+
+
+---
+*Status: Ready to implement company tagging system*

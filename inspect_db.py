@@ -37,7 +37,7 @@ def inspect_database(limit=10, show_content=True, show_metadata=True, filter_sou
         # Get documents without any filters first
         results = collection.get(
             limit=limit,
-            include=['documents', 'metadatas']
+            include=['documents', 'metadatas', 'ids']
         )
         
         print(f"✅ Retrieved {len(results['ids'])} documents")
@@ -110,7 +110,7 @@ def inspect_database(limit=10, show_content=True, show_metadata=True, filter_sou
             filtered_results = collection.get(
                 where={"source": filter_source},
                 limit=limit,
-                include=['documents', 'metadatas']
+                include=['documents', 'metadatas', 'ids']
             )
             
             print(f"Found {len(filtered_results['ids'])} documents from {filter_source}")

@@ -6,6 +6,8 @@ from chunker import chunk_text  # Ensure this matches your actual tokenizer logi
 client = chromadb.PersistentClient(path="./chroma_db")
 collection = get_competitor_collection(client)
 
+def print_collection():
+    
 # === Optional cleanup ===
 print("🧹 Removing previous 'cyberboing_test' documents...")
 try:
