@@ -214,13 +214,13 @@ Tenable offers vulnerability management solutions with comprehensive scanning ca
 Their pricing starts at $2,500 per year for 100 assets. Key features include:
 - Continuous vulnerability scanning
 - Risk-based prioritization
-- Compliance reporting
+- Compliance reportin
 
 Compared to competitors like Qualys and Rapid7, Tenable focuses more on asset discovery.
 """
     
     print("🧪 Testing company tagging...")
-    print(f"Total Number Companies: {list_all_companies}")
+    print(f"Total Number Companies: {', '.join(list(list_all_companies))}")
     chunks_with_metadata = chunk_text_with_company_context(sample_text, "tenable_analysis.txt")
     
     for i, (chunk, metadata) in enumerate(chunks_with_metadata):

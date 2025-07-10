@@ -3,131 +3,79 @@ import chromadb
 import argparse
 import fitz  # PyMuPDF
 from pathlib import Path
-from chunker import chunk_text_with_metadata, chunk_text_smart
-from embedding_config import get_competitor_collection
 from datetime import datetime
+from embedding_config import get_competitor_collection
+from metadata_chunker import MetadataChunker  # Ensure your base class is here
 
 os.environ['ONNX_DISABLE_COREML'] = '1'
 
-# ----------------------
-# CLI argument parsing
-# ----------------------
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Ingest internal documents into ChromaDB with enhanced metadata")
-    parser.add_argument("--chunk-size", type=int, default=512, help="Chunk size (default: 512)")
-    parser.add_argument("--overlap", type=int, default=64, help="Chunk overlap (default: 64)")
-    parser.add_argument("--limit", type=int, default=None, help="Optional limit on number of chunks processed")
-    parser.add_argument("--include-pdf", action="store_true", help="Include PDFs (default off)")
-    parser.add_argument("--exclude-ext", type=str, default="", help="Pipe-delimited list of extensions to exclude (e.g. 'md|docx')")
-    parser.add_argument("--reset-collection", action="store_true", help="Reset collection before ingestion")
-    parser.add_argument("--source-priority", type=str, default="internal_data", help="Comma-separated list of directories in priority order")
-    parser.add_argument("--dry-run", action="store_true", help="Preview what would be ingested without actually doing it")
-    
+    parser.add_argument("--chunk-size", type=int, default=512)
+    parser.add_argument("--overlap", type=int, default=64)
+    parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--include-pdf", action="store_true")
+    parser.add_argument("--exclude-ext", type=str, default="")
+    parser.add_argument("--reset-collection", action="store_true")
+    parser.add_argument("--source-priority", type=str, default="internal_data")
+    parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args()
 
-# ----------------------
-# File reading utilities
-# ----------------------
 def read_txt(path):
-    encodings = ['utf-8', 'latin-1', 'cp1252']  # Try multiple encodings
-    for encoding in encodings:
+    for enc in ['utf-8', 'latin-1', 'cp1252']:
         try:
-            with open(path, "r", encoding=encoding) as f:
+            with open(path, "r", encoding=enc) as f:
                 return f.read().strip()
         except UnicodeDecodeError:
             continue
-    raise Exception("Could not decode file with any of: {}".format(encodings))
+    raise Exception(f"❌ Unable to decode file: {path}")
 
 def read_pdf(path):
     try:
         with fitz.open(path) as doc:
-            text = ""
-            for page_num, page in enumerate(doc):
-                page_text = page.get_text()
-                if page_text.strip():  # Only add non-empty pages
-                    text += f"\n[Page {page_num + 1}]\n{page_text}"
-            return text.strip()
+            return "\n".join(f"[Page {i+1}]\n{page.get_text()}" for i, page in enumerate(doc) if page.get_text().strip())
     except Exception as e:
         print(f"⚠️ Failed to read PDF: {path} - {e}")
         return ""
 
-def get_file_priority(filepath, priority_dirs):
-    """Assign priority based on directory."""
-    for i, priority_dir in enumerate(priority_dirs):
-        if priority_dir in str(filepath):
-            return i
-    return len(priority_dirs)  # Lowest priority for non-matching
+def should_process_file(path, include_pdf, exclude_exts):
+    ext = os.path.splitext(path)[1].lower()
+    return ext == ".txt" or (ext == ".pdf" and include_pdf) if ext not in exclude_exts else False
 
-def should_process_file(filepath, include_pdf, exclude_exts):
-    """Determine if file should be processed."""
-    ext = os.path.splitext(filepath)[1].lower()
-    
-    if ext in exclude_exts:
-        return False
-    
-    if ext == ".txt":
-        return True
-    elif ext == ".pdf" and include_pdf:
-        return True
-    
-    return False
+def get_file_priority(path, priority_dirs):
+    for i, p in enumerate(priority_dirs):
+        if p in str(path):
+            return i
+    return len(priority_dirs)
 
 def flush_batch(collection, batch):
-    """Flush a batch of documents to ChromaDB with validation."""
     if not batch:
         return
-    
-    # Validate batch items before processing
-    valid_items = []
-    for item in batch:
-        if not item.get("text") or not item.get("metadata") or not item.get("id"):
-            print(f"⚠️ Skipping invalid item: {item.get('id', 'Unknown')}")
-            continue
-            
-        # Ensure text is not empty
-        if len(item["text"].strip()) < 10:
-            print(f"⚠️ Skipping too short text: {item['id']}")
-            continue
-            
-        # Ensure metadata is not None
-        if item["metadata"] is None:
-            print(f"⚠️ Skipping None metadata: {item['id']}")
-            continue
-            
-        valid_items.append(item)
-    
-    if not valid_items:
-        print("❌ No valid items to flush")
-        return
-    
     try:
         collection.add(
-            documents=[item["text"] for item in valid_items],
-            metadatas=[item["metadata"] for item in valid_items],
-            ids=[item["id"] for item in valid_items],
+            documents=[i["text"] for i in batch],
+            metadatas=[i["metadata"] for i in batch],
+            ids=[i["id"] for i in batch],
         )
-        print(f"  ✅ Flushed {len(valid_items)} chunks to database")
+        print(f"✅ Flushed {len(batch)} chunks to DB")
     except Exception as e:
-        print(f"  ❌ Failed to flush batch: {e}")
-        # Try to add items individually to identify problematic ones
-        for item in valid_items:
+        print(f"❌ Batch flush failed: {e}")
+        for item in batch:
             try:
                 collection.add(
                     documents=[item["text"]],
                     metadatas=[item["metadata"]],
-                    ids=[item["id"]]
+                    ids=[item["id"]],
                 )
-            except Exception as individual_error:
-                print(f"    ❌ Failed individual item {item['id']}: {individual_error}")
+            except Exception as ind_err:
+                print(f"  ❌ Failed to add: {item['id']} → {ind_err}")
 
-# ----------------------
-# Enhanced ingestion with metadata
-# ----------------------
-def ingest_documents_from_directories(
-    directories, 
-    chunk_size=512, 
-    overlap=64, 
-    include_pdf=False, 
+def ingest_documents(
+    directories,
+    chunkers: list,
+    chunk_size=512,
+    overlap=64,
+    include_pdf=False,
     exclude_ext="",
     reset_collection=False,
     source_priority="internal_data",
@@ -135,170 +83,100 @@ def ingest_documents_from_directories(
     dry_run=False,
     batch_size=50
 ):
-    """Enhanced document ingestion with better metadata and prioritization."""
-    
-    # Setup
     exclude_exts = {f".{ext.strip().lower()}" for ext in exclude_ext.split("|") if ext.strip()}
     priority_dirs = [d.strip() for d in source_priority.split(",")]
-    
-    # Connect to ChromaDB
+
     client = chromadb.PersistentClient(path="./chroma_db")
-    
-    if reset_collection:
-        try:
-            from embedding_config import reset_collection
-            collection = reset_collection(client)
-        except ImportError:
-            print("⚠️ Could not import reset_collection, using existing collection")
-            collection = get_competitor_collection(client)
-    else:
-        collection = get_competitor_collection(client)
-    
-    print(f"🚀 Starting ingestion...")
-    print(f"  Directories: {directories}")
-    print(f"  Chunk size: {chunk_size}, Overlap: {overlap}")
-    print(f"  Include PDFs: {include_pdf}")
-    print(f"  Exclude extensions: {exclude_exts}")
-    print(f"  Priority order: {priority_dirs}")
-    print(f"  Dry run: {dry_run}")
-    
-    # Collect all files first for better progress tracking
+    collection = get_competitor_collection(client)
+
+    print("🚀 Starting multi-chunker ingestion")
+
     all_files = []
-    
     for root_dir in directories:
-        if not os.path.exists(root_dir):
-            print(f"⚠️ Directory not found: {root_dir}")
-            continue
-            
         for dirpath, _, filenames in os.walk(root_dir):
-            for filename in filenames:
-                filepath = os.path.join(dirpath, filename)
-                
-                if should_process_file(filepath, include_pdf, exclude_exts):
-                    priority = get_file_priority(filepath, priority_dirs)
-                    all_files.append((filepath, filename, priority))
-    
-    # Sort by priority (lower number = higher priority)
+            for f in filenames:
+                path = os.path.join(dirpath, f)
+                if should_process_file(path, include_pdf, exclude_exts):
+                    all_files.append((path, f, get_file_priority(path, priority_dirs)))
+
     all_files.sort(key=lambda x: x[2])
-    
-    print(f"📁 Found {len(all_files)} files to process")
-    
+    print(f"📁 Found {len(all_files)} files")
+
     if dry_run:
-        print("\n🔍 DRY RUN - Files that would be processed:")
-        for filepath, filename, priority in all_files[:10]:  # Show first 10
-            print(f"  Priority {priority}: {filepath}")
-        if len(all_files) > 10:
-            print(f"  ... and {len(all_files) - 10} more files")
-        return "Dry run completed"
-    
-    # Process files
-    chunk_count = 0
+        print("🔍 DRY RUN:")
+        for f in all_files[:10]:
+            print(f"  {f[0]}")
+        return "Dry run done."
+
     file_count = 0
+    chunk_count = 0
     batch = []
-    failed_files = []
-    
+
     for filepath, filename, priority in all_files:
         try:
-            print(f"📄 Processing ({file_count + 1}/{len(all_files)}): {filepath}")
-            
-            # Read file content
-            if filepath.endswith('.pdf'):
-                content = read_pdf(filepath)
-            else:
-                content = read_txt(filepath)
-            
-            if not content or len(content.strip()) < 100:  # Skip very short files
-                print(f"  ⚠️ Skipping (too short): {filename}")
+            print(f"📄 {filepath}")
+            content = read_pdf(filepath) if filepath.endswith(".pdf") else read_txt(filepath)
+            if not content or len(content.strip()) < 100:
+                print(f"⚠️ Skipped: too short")
                 continue
-            
-            # Enhanced metadata
+
             file_stats = os.stat(filepath)
             base_metadata = {
                 "source": filename,
-                "full_path": filepath,
-                "directory": os.path.dirname(filepath),
+                "path": filepath,
                 "priority": priority,
                 "file_size": file_stats.st_size,
-                "modified_time": datetime.fromtimestamp(file_stats.st_mtime).isoformat(),
-                "ingestion_time": datetime.now().isoformat(),
-                "file_type": "pdf" if filepath.endswith('.pdf') else "text"
+                "mod_time": datetime.fromtimestamp(file_stats.st_mtime).isoformat(),
+                "ingested_at": datetime.now().isoformat()
             }
-            
-            # Get chunks with metadata
-            chunks_with_metadata = chunk_text_with_metadata(content, filename, chunk_size, overlap)
-            
-            print(f"  📊 Generated {len(chunks_with_metadata)} chunks")
-            
-            # Add to batch
-            for chunk_idx, (chunk_text, chunk_metadata) in enumerate(chunks_with_metadata):
-                # Validate chunk content
-                if not chunk_text or len(chunk_text.strip()) < 10:
-                    print(f"  ⚠️ Skipping empty/short chunk {chunk_idx}")
-                    continue
-                
-                # Merge file metadata with chunk metadata
-                final_metadata = {**base_metadata, **chunk_metadata}
-                
-                # Validate final metadata
-                if final_metadata is None:
-                    print(f"  ⚠️ Skipping chunk with None metadata: {chunk_idx}")
-                    continue
-                
-                doc_id = f"{filename}_{chunk_idx}_{file_count}"  # Ensure uniqueness
-                
-                batch.append({
-                    "text": chunk_text,
-                    "metadata": final_metadata,
-                    "id": doc_id
-                })
-                
-                chunk_count += 1
-                
-                # Check limits
-                if limit and chunk_count >= limit:
-                    flush_batch(collection, batch)
-                    print(f"🔁 Reached limit of {limit} chunks")
-                    return f"Processed {file_count + 1} files, {chunk_count} chunks (limit reached)"
-                
-                # Flush batch if full
-                if len(batch) >= batch_size:
-                    flush_batch(collection, batch)
-                    batch.clear()
-            
-            file_count += 1
-            
-        except Exception as e:
-            print(f"❌ Failed to process {filepath}: {e}")
-            failed_files.append(filepath)
-            continue
-    
-    # Flush remaining batch
-    flush_batch(collection, batch)
-    
-    # Summary
-    summary = f"""
-✅ INGESTION COMPLETE
-📁 Files processed: {file_count}
-📊 Total chunks: {chunk_count}
-❌ Failed files: {len(failed_files)}
-"""
-    
-    if failed_files:
-        summary += f"\nFailed files:\n" + "\n".join(f"  - {f}" for f in failed_files[:5])
-        if len(failed_files) > 5:
-            summary += f"\n  ... and {len(failed_files) - 5} more"
-    
-    print(summary)
-    return summary
 
-# ----------------------
-# Entry point
-# ----------------------
+            for chunker_class in chunkers:
+                chunker = chunker_class(
+                    file=filepath,
+                    file_name=filename,
+                    chunk_size=chunk_size,
+                    overlap=overlap
+                )
+                chunks = chunker.get_chunks(content)
+                print(f"  🧩 {len(chunks)} chunks from {chunker.__class__.__name__}")
+
+                for i, (chunk_text, metadata) in enumerate(chunks):
+                    doc_id = f"{filename}_{chunker.__class__.__name__}_{i}_{file_count}"
+                    final_metadata = {**base_metadata, **metadata}
+                    if not chunk_text.strip():
+                        continue
+                    batch.append({
+                        "text": chunk_text,
+                        "metadata": final_metadata,
+                        "id": doc_id
+                    })
+                    chunk_count += 1
+
+                    if limit and chunk_count >= limit:
+                        flush_batch(collection, batch)
+                        return f"LIMIT REACHED: {chunk_count} chunks"
+
+                    if len(batch) >= batch_size:
+                        flush_batch(collection, batch)
+                        batch.clear()
+
+            file_count += 1
+        except Exception as e:
+            print(f"❌ Error on {filepath}: {e}")
+            continue
+
+    flush_batch(collection, batch)
+    return f"✅ Done. Files: {file_count}, Chunks: {chunk_count}"
+
 if __name__ == "__main__":
+    from default_chunker import DefaultChunker
+    from company_tagging_chunker import CompanyChunker
+
     args = parse_arguments()
-    
-    result = ingest_documents_from_directories(
+
+    result = ingest_documents(
         directories=["internal_data", "output"],
+        chunkers=[DefaultChunker, CompanyChunker],
         chunk_size=args.chunk_size,
         overlap=args.overlap,
         include_pdf=args.include_pdf,
@@ -306,7 +184,7 @@ if __name__ == "__main__":
         reset_collection=args.reset_collection,
         source_priority=args.source_priority,
         limit=args.limit,
-        dry_run=args.dry_run
+        dry_run=args.dry_run,
     )
-    
-    print(f"\n{result}")
+
+    print(result)
