@@ -220,6 +220,7 @@ Compared to competitors like Qualys and Rapid7, Tenable focuses more on asset di
 """
     
     print("🧪 Testing company tagging...")
+    print(f"Total Number Companies: {list_all_companies}")
     chunks_with_metadata = chunk_text_with_company_context(sample_text, "tenable_analysis.txt")
     
     for i, (chunk, metadata) in enumerate(chunks_with_metadata):
@@ -227,4 +228,4 @@ Compared to competitors like Qualys and Rapid7, Tenable focuses more on asset di
         print(f"Primary Company: {metadata.get('primary_company')}")
         print(f"All Companies: {metadata.get('all_companies')}")
         print(f"Content Type: {metadata.get('content_type')}")
-        print(f"Content: {chunk[:100]}...")
+        print(f"Content: {chunk}...")
