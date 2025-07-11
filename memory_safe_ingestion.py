@@ -66,7 +66,7 @@ class MemorySafeIngestion:
 def run_memory_safe_ingestion(chunker_func: Callable):
     # Assume chunker_func returns List[Tuple[str, dict]]
     chunks = chunker_func()
-    driver = MemorySafeIngestion(batch_size=10, delay_sec=1.0)
+    driver = MemorySafeIngestion(batch_size=10, delay_sec=3.0)
     driver.ingest(chunks, doc_prefix="safe_test")
 
 # You can test with:
