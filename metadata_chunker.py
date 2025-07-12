@@ -74,3 +74,7 @@ class CompanyChunker(MetadataChunker):
             result.append((chunk, metadata))
 
         return result
+
+# would like to be able to chunk video converted to text crawler would provide the links in each respective content
+class VideoChunker(MetadataChunker):
+    def chunk(self) -> List[Tuple[str, dict]]: ...

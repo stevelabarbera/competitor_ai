@@ -9,16 +9,24 @@ import re
 
 # === Config ===
 OUTPUT_DIR = "output"
-KEYWORDS = [r"attack surface management", r"external exposure", r"asset inventory"]
+KEYWORDS = [r"attack surface management", r"external exposure", r"asset inventory",r"attack surface",r"asm",r"integration",r"cost",r"fee",r"subscription",r"license","licensing"]
 
 # Regex patterns: key = regex, value = True to allow, False to deny
 LINK_FILTERS = {
     r"/(privacy|terms|login)": False,
     r"attack-surface-management": True,
     r"/blog/.*": True,
+    r"/.*asm.*/": True,
+    r"/.*license.*/": True,
+    r"/.*licensing.*/": True,
+    r"/.*price.*/": True,
+    r"/.*pricing.*/": True,
+    r"/.*cost.*/": True,
+    r"/.*subscription.*/": True,
+
 }
 
-MAX_DEPTH = 2
+MAX_DEPTH = 12
 VISITED = set()
 
 # === Utils ===
@@ -87,7 +95,9 @@ async def crawl_page(playwright, url, base_url, depth):
                 download_pdf(full_url, pdf_dir)
 
         # === Extract if relevant ===
-        if matches_keywords(url) or matches_keywords(soup.get_text()):
+        matched_keywords_url = matches_keywords(url) 
+        matched_keywords_html = matches_keywords(soup.get_text())
+        if matched_keywords_url or matched_keywords_html:
             extracted = trafilatura.extract(html)
             if extracted:
                 print(f"[Extract] ✅ Relevant content from: {url}")
@@ -95,7 +105,7 @@ async def crawl_page(playwright, url, base_url, depth):
             else:
                 print(f"[Extract] ❌ Could not extract from: {url}")
         else:
-            print(f"[Extract] 🔕 Irrelevant: {url}")
+            print(f"[Extract] 🔕 Irrelevant: {url} match_keyword_url: {matched_keywords_url} matched_keywords_html: {matched_keywords_html}")
 
         # === Crawl internal links ===
         for a in soup.find_all("a", href=True):
@@ -117,5 +127,5 @@ async def main(start_urls):
             await crawl_page(playwright, url, url, depth=0)
 
 if __name__ == "__main__":
-    competitor_urls = [f"https://tenable.com"]#[f"https://censys.com","https://shodan.io","https://www.paloaltonetworks.com","https://www.cycognito.com"]
+    competitor_urls = [f"https://censys.com"]#[f"https://censys.com","https://shodan.io","https://www.paloaltonetworks.com","https://www.cycognito.com"]
     asyncio.run(main(competitor_urls))

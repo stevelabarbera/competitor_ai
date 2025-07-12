@@ -9,6 +9,15 @@ from metadata_chunker import MetadataChunker  # Ensure your base class is here
 
 os.environ['ONNX_DISABLE_COREML'] = '1'
 
+def sanitize_metadata(metadata: dict) -> dict:
+    sanitized = {}
+    for k, v in metadata.items():
+        if isinstance(v, list):
+            sanitized[k] = ", ".join(map(str, v))
+        else:
+            sanitized[k] = v
+    return sanitized
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Ingest internal documents into ChromaDB with enhanced metadata")
     parser.add_argument("--chunk-size", type=int, default=512)
@@ -138,13 +147,16 @@ def ingest_documents(
                     overlap=overlap
                 )
                 chunks = chunker.get_chunks(content)
+                
                 print(f"  🧩 {len(chunks)} chunks from {chunker.__class__.__name__}")
-
                 for i, (chunk_text, metadata) in enumerate(chunks):
                     doc_id = f"{filename}_{chunker.__class__.__name__}_{i}_{file_count}"
-                    final_metadata = {**base_metadata, **metadata}
+                    combined_metadata = {**base_metadata, **metadata}
+                    final_metadata = sanitize_metadata(combined_metadata)  # <-- 🧼 Cleaned here
+
                     if not chunk_text.strip():
                         continue
+
                     batch.append({
                         "text": chunk_text,
                         "metadata": final_metadata,
@@ -169,8 +181,9 @@ def ingest_documents(
     return f"✅ Done. Files: {file_count}, Chunks: {chunk_count}"
 
 if __name__ == "__main__":
-    from default_chunker import DefaultChunker
-    from company_tagging_chunker import CompanyChunker
+   # from default_chunker import DefaultChunker
+  #  from company_tagging_chunker import CompanyChunker
+    from metadata_chunker import DefaultChunker, CompanyChunker
 
     args = parse_arguments()
 
