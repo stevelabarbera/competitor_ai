@@ -1,4 +1,4 @@
-# Our knowledge base: A list of text documents about renewable energy
+.b# Our knowledge base: A list of text documents about renewable energy
 corpus_texts = [
     "Solar power uses PV panels or CSP systems. PV converts sunlight directly to electricity. CSP uses mirrors to heat fluid driving a turbine. It's clean but varies with weather/time. Storage (batteries) is key for consistency.", # Doc 0
     "Wind energy uses turbines in wind farms. It's sustainable with low operating costs. Wind speed varies, siting can be challenging (visual/noise). Offshore wind is stronger and more consistent.", # Doc 1
@@ -27,5 +27,12 @@ Their pricing starts at $2,500 per year for 100 assets. Key features include:
 - Continuous vulnerability scanning
 - Risk-based prioritization
 - Compliance reportin
+~
 
 Compared to competitors like Qualys and Rapid7, Tenable focuses more on asset discovery.
+P
+
+
+
+
+%Embedding Model Mismatch: You're using llama3 for embeddings but llama3:instruct for generation

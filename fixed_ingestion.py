@@ -141,8 +141,7 @@ def ingest_documents(
 
             for chunker_class in chunkers:
                 chunker = chunker_class(
-                    file=filepath,
-                    file_name=filename,
+                    file_content=content,
                     chunk_size=chunk_size,
                     overlap=overlap
                 )

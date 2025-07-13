@@ -9,6 +9,12 @@ def get_shared_embedding_function():
     """
     # Try to use a proper embedding model if available
     # Common options: nomic-embed-text, all-minilm, mxbai-embed-large
+    # here is the list of currently available models
+    #llama3:instruct            365c0bd3c000    4.7 GB    2 weeks ago    
+    #phi3:mini                  4f2222927938    2.2 GB    3 weeks ago    
+    #command-r-plus:latest      e61b6b184f38    59 GB     3 weeks ago    
+    #nomic-embed-text:latest    0a109f422b47    274 MB    4 weeks ago    
+    #llama3:latest              365c0bd3c000    4.7 GB    4 weeks ago
     embedding_models = [
         "nomic-embed-text",      # Recommended - good for RAG
         "all-minilm",            # Lightweight option
@@ -18,8 +24,7 @@ def get_shared_embedding_function():
     
     # You should manually check which model works best
     # For now, using your current setup but you should consider switching
-    model_name = "llama3"  # Change this to "nomic-embed-text" if you have it
-    
+    model_name = "nomic-embed-text:latest"  # Change this to "nomic-embed-text" if you have it
     print(f"🔧 Using embedding model: {model_name}")
     return OllamaEmbeddingFunction(model_name=model_name)
 

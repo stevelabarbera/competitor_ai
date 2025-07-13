@@ -5,8 +5,7 @@ from company_tagging_chunker import parse_company_tags, normalize_company_name
 from typing import List, Tuple
 
 class MetadataChunker(ABC):
-    def __init__(self, file_name: str, file_content: str, chunk_size: int = 512, overlap: int = 64):
-        self.file_name = file_name
+    def __init__(self,file_content: str, chunk_size: int = 512, overlap: int = 64):
         self.file_content = file_content
         self.chunk_size = chunk_size
         self.overlap = overlap
