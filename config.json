@@ -1,21 +1,19 @@
 {
     "search_terms": [
-        "vintage camera",
-        "mechanical keyboard",
-        "vinyl records"
-    ],
-    "location": "New York, NY",
-    "max_price": 200,
+        "arcade"
+            ],
+    "location": "Watsonville, CA",
+    "max_price": 2000,
     "min_price": 0,
-    "radius_miles": 25,
-    "check_interval_minutes": 15,
+    "radius_miles": 60,
+    "check_interval_minutes": 360,
     "email": {
         "enabled": false,
         "smtp_server": "smtp.gmail.com",
         "smtp_port": 587,
-        "sender_email": "your-email@gmail.com",
-        "sender_password": "your-app-password",
-        "recipient_email": "your-email@gmail.com"
+        "sender_email": "steve.labarbera.one@gmail.com",
+        "sender_password": "steve.labarbera.one@gmail.com",
+        "recipient_email": "steve.labarbera.one@gmail.com"
     },
     "desktop_notifications": true
 }

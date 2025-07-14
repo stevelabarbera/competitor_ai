@@ -1,3 +1,4 @@
+#fixed_ingestion.py
 import os
 import chromadb
 import argparse
@@ -141,17 +142,18 @@ def ingest_documents(
 
             for chunker_class in chunkers:
                 chunker = chunker_class(
+                    file_name=filename,
                     file_content=content,
                     chunk_size=chunk_size,
                     overlap=overlap
                 )
-                chunks = chunker.get_chunks(content)
-                
+                chunks = chunker.chunk()
+
                 print(f"  🧩 {len(chunks)} chunks from {chunker.__class__.__name__}")
                 for i, (chunk_text, metadata) in enumerate(chunks):
                     doc_id = f"{filename}_{chunker.__class__.__name__}_{i}_{file_count}"
                     combined_metadata = {**base_metadata, **metadata}
-                    final_metadata = sanitize_metadata(combined_metadata)  # <-- 🧼 Cleaned here
+                    final_metadata = sanitize_metadata(combined_metadata)
 
                     if not chunk_text.strip():
                         continue
@@ -171,6 +173,7 @@ def ingest_documents(
                         flush_batch(collection, batch)
                         batch.clear()
 
+
             file_count += 1
         except Exception as e:
             print(f"❌ Error on {filepath}: {e}")
@@ -180,8 +183,6 @@ def ingest_documents(
     return f"✅ Done. Files: {file_count}, Chunks: {chunk_count}"
 
 if __name__ == "__main__":
-   # from default_chunker import DefaultChunker
-  #  from company_tagging_chunker import CompanyChunker
     from metadata_chunker import DefaultChunker, CompanyChunker
 
     args = parse_arguments()

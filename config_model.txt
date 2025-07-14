@@ -1,1 +1,1 @@
-llama3:instruct
+llama3:8b
