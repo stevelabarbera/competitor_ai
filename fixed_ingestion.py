@@ -121,12 +121,21 @@ def ingest_documents(
     file_count = 0
     chunk_count = 0
     batch = []
-
     for filepath, filename, priority in all_files:
         try:
             print(f"📄 {filepath}")
             content = read_pdf(filepath) if filepath.endswith(".pdf") else read_txt(filepath)
-            if not content or len(content.strip()) < 100:
+
+            # ✅ DEBUG: Check content type before calling .strip()
+            print(f"🔍 Content type: {type(content)}")
+            if isinstance(content, tuple):
+                print(f"🚨 Unexpected tuple content: {content}")
+                content = content[0]  # fallback for tuple-wrapped content
+
+            if not isinstance(content, str):
+                raise ValueError(f"❌ Content is not a string: {type(content)}")
+
+            if not content.strip():
                 print(f"⚠️ Skipped: too short")
                 continue
 
@@ -149,6 +158,9 @@ def ingest_documents(
                 )
                 chunks = chunker.chunk()
 
+                if not all(isinstance(c, tuple) and isinstance(c[0], str) for c in chunks):
+                    raise TypeError(f"❌ Invalid chunk format returned: {chunks[:2]}")
+
                 print(f"  🧩 {len(chunks)} chunks from {chunker.__class__.__name__}")
                 for i, (chunk_text, metadata) in enumerate(chunks):
                     doc_id = f"{filename}_{chunker.__class__.__name__}_{i}_{file_count}"
@@ -167,17 +179,19 @@ def ingest_documents(
 
                     if limit and chunk_count >= limit:
                         flush_batch(collection, batch)
-                        return f"LIMIT REACHED: {chunk_count} chunks"
+                        print(f"🚨 LIMIT REACHED: {chunk_count} chunks")
+                        break
 
                     if len(batch) >= batch_size:
                         flush_batch(collection, batch)
                         batch.clear()
 
-
             file_count += 1
+
         except Exception as e:
             print(f"❌ Error on {filepath}: {e}")
             continue
+
 
     flush_batch(collection, batch)
     return f"✅ Done. Files: {file_count}, Chunks: {chunk_count}"
