@@ -14,12 +14,10 @@ os.environ['ONNX_DISABLE_COREML'] = '1'
 def sanitize_metadata(metadata: dict) -> dict:
     sanitized = {}
     for k, v in metadata.items():
-        if v is None:
-            continue  # Skip None values entirely
         if isinstance(v, list):
             sanitized[k] = ", ".join(map(str, v))
         else:
-            sanitized[k] = str(v)  # Ensure value is always a string
+            sanitized[k] = v
     return sanitized
 
 def parse_arguments():
@@ -165,16 +163,20 @@ def ingest_documents(
 
             print(f"🔍 Content type: {type(content)}")
             if isinstance(content, tuple):
-                print(f"🚨 Unexpected tuple content: {content}")
-                content = content[0]  # fallback for tuple-wrapped content
+                print(f"🚨 Tuple detected BEFORE .strip() in {filepath}: {content}")
+                content = content[0]
 
             if not isinstance(content, str):
-                raise ValueError(f"❌ Content is not a string: {type(content)}")
+                raise ValueError(f"❌ Content is not a string before strip: {type(content)}")
 
+            print(f"🔬 About to call .strip() on content preview: {content[:100]!r}")
+            print(f"Human_Test line_count: 173 ... {type(content)} ... {content[:25].strip()}...")
             if not content.strip():
                 print(f"⚠️ Skipped: too short")
                 continue
 
+
+            print(f"Human_Test line_count:179 ... {type(content)} ... {content[:25].strip()}...")
             file_stats = os.stat(filepath)
             base_metadata = {
                 "source": filename,
@@ -184,6 +186,7 @@ def ingest_documents(
                 "mod_time": datetime.fromtimestamp(file_stats.st_mtime).isoformat(),
                 "ingested_at": datetime.now().isoformat()
             }
+            print(f"Human_Test line_count:189 ... {type(content)} ... {content[:25].strip()}...")
 
             for chunker_class in chunkers:
                 chunker = chunker_class(
@@ -192,26 +195,44 @@ def ingest_documents(
                     chunk_size=chunk_size,
                     overlap=overlap
                 )
+                print(f"Human_Test line_count:198 ... {type(content)} ... {content[:25].strip()}...")
                 chunks = chunker.chunk()
+                print(f"Human_Test line_count:200 ... {type(content)} ... {content[:50].strip()}...")
 
                 if not all(isinstance(c, tuple) and isinstance(c[0], str) for c in chunks):
                     raise TypeError(f"❌ Invalid chunk format returned: {chunks[:2]}")
+            
+                print(f"Human_Test line_count:205 ... {type(content)} ... {content[:50].strip()}...")
 
                 # Apply filtering
                 if filter_obj:
                     before = len(chunks)
+                    print(f"Human_Test line_count:210 ... {type(content)} ... {content[:50].strip()}...")
                     chunks = filter_obj.filter(chunks)
+                    print(f"Human_Test line_count:212... {type(content)} ... {content[:50].strip()}...")
+
                     after = len(chunks)
                     print(f"  🧹 {filter_obj.__class__.__name__}: {before} → {after} chunks")
+            
+                    print(f"Human_Test line_count:214 ... {type(content)} ... {content[:50].strip()}...")
 
                 print(f"  🧩 {len(chunks)} chunks from {chunker.__class__.__name__}")
+
                 for i, (chunk_text, metadata) in enumerate(chunks):
-                    doc_id = f"{filename}_{chunker.__class__.__name__}_{i}_{file_count}"
-                    combined_metadata = {**base_metadata, **metadata}
-                    final_metadata = sanitize_metadata(combined_metadata)
+                    # 🛠 Flatten if chunk_text is accidentally wrapped as a tuple
+                    if isinstance(chunk_text, tuple):
+                        print(f"⚠️ Flattening tuple chunk_text at {filename} index {i}: {chunk_text}")
+                        chunk_text = chunk_text[0]
+
+                    if not isinstance(chunk_text, str):
+                        raise TypeError(f"❌ chunk_text is not a string at {filename} index {i}: {type(chunk_text)}")
 
                     if not chunk_text.strip():
                         continue
+
+                    doc_id = f"{filename}_{chunker.__class__.__name__}_{i}_{file_count}"
+                    combined_metadata = {**base_metadata, **metadata}
+                    final_metadata = sanitize_metadata(combined_metadata)
 
                     batch.append({
                         "text": chunk_text,
@@ -219,6 +240,22 @@ def ingest_documents(
                         "id": doc_id
                     })
                     chunk_count += 1
+
+                    '''
+                    for i, (chunk_text, metadata) in enumerate(chunks):
+                    doc_id = f"{filename}_{chunker.__class__.__name__}_{i}_{file_count}"
+                    combined_metadata = {**base_metadata, **metadata}
+                    final_metadata = sanitize_metadata(combined_metadata)
+
+                    if not chunk_text.strip():
+                        continue
+                    batch.append({
+                        "text": chunk_text,
+                        "metadata": final_metadata,
+                        "id": doc_id
+                    })
+                    chunk_count += 1
+                    '''
 
                     if limit and chunk_count >= limit:
                         flush_batch(collection, batch)

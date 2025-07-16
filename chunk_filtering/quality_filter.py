@@ -1,6 +1,6 @@
 # chunk_filtering/quality_filter.py
 
-from typing import List
+from typing import List, Tuple
 from .base import BaseChunkFilter
 
 class QualityFilter(BaseChunkFilter):
@@ -14,12 +14,15 @@ class QualityFilter(BaseChunkFilter):
             "legal notice", "cookie policy"
         ]
 
-    def filter(self, chunks: List[str]) -> List[str]:
+    def filter(self, chunks: List[Tuple[str, dict]]) -> List[Tuple[str, dict]]:
         """Apply filtering to remove short or boilerplate-like chunks."""
         result = []
 
-        for chunk in chunks:
-            text = chunk.strip()
+        for chunk_text, metadata in chunks:
+            if not isinstance(chunk_text, str):
+                continue
+
+            text = chunk_text.strip()
             if not text:
                 continue
 
@@ -31,8 +34,8 @@ class QualityFilter(BaseChunkFilter):
             if any(signal in chunk_lower for signal in self.boilerplate_signals):
                 continue
 
-            # Optional: Remove excess whitespace and blank lines
+            # Optional: Normalize whitespace
             cleaned = "\n".join(line.strip() for line in text.splitlines() if line.strip())
-            result.append(cleaned)
+            result.append((cleaned, metadata))
 
         return result

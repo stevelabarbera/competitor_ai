@@ -8,6 +8,7 @@ from whoosh.qparser import QueryParser
 from embedding_config import get_competitor_collection
 import subprocess
 import json
+import traceback
 from typing import List, Dict, Tuple
 from chunk_filtering.quality_filter import QualityFilter
 
@@ -62,7 +63,7 @@ Most relevant chunk numbers:
         indices = [i for i in indices if 0 <= i < len(chunks)][:top_k]
         if not indices:
             return chunks[:top_k]
-        return [chusnks[i] for i in indices]
+        return [chunks[i] for i in indices]
     except Exception as e:
         print(f"⚠️ Reranking failed: {e}, using original order")
         return chunks[:top_k]
@@ -93,7 +94,13 @@ def search_semantic_enhanced(question: str, n_results: int = 10, source_filter: 
         query_params["where"] = {"source": source_filter}
 
     results = collection.query(**query_params)
+    print("📦 Raw Chroma query result:", json.dumps(results, indent=2, default=str))
+
     chunks = results.get("documents", [[]])[0]
+    if not isinstance(chunks, list):
+        print(f"⚠️ Unexpected format for documents: {type(chunks)} - {chunks}")
+        return []
+
     if not chunks:
         return []
 
@@ -208,29 +215,9 @@ ANSWER (based only on the context above):
         return query_ollama(final_prompt)
 
     except Exception as e:
+        print("💥 Full traceback:")
+        traceback.print_exc()
         return f"❌ Error during {mode} search: {e}"
-
-# Update CLI to accept company parameter
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--question", required=True, help="Question to ask")
-    parser.add_argument("--mode", default="semantic", choices=["semantic", "keyword", "hybrid", "full"], help="Search mode")
-    parser.add_argument("--source", default=None, help="Optional source filter")
-    parser.add_argument("--company", default=None, help="Optional company filter")  # New parameter
-    parser.add_argument("--no-rerank", action="store_true", help="Disable LLM reranking")
-    parser.add_argument("--slow", action="store_true", help="Use slow mode (lower RAM usage)")
-    args = parser.parse_args()
-
-    answer = ask_enhanced(
-        question=args.question,
-        mode=args.mode,
-        source_filter=args.source,
-        company=args.company,  # Pass company parameter
-        use_reranking=not args.no_rerank,
-        n_results=SEMANTIC_RESULTS_LIMIT,
-        top_k=RERANK_TOP_K
-    )
-    print(f"\n💬 Answer:\n{answer}")
 
 # Usage examples:
 # python script.py --question "What is their revenue?" --mode keyword --company "Apple"
@@ -319,6 +306,8 @@ ANSWER (based only on the context above):
         return query_ollama(final_prompt)
 
     except Exception as e:
+        print("💥 Full traceback:")
+        traceback.print_exc()
         return f"❌ Error during {mode} search: {e}"
 
 def ask(question: str, mode: str = "semantic") -> str:
