@@ -38,7 +38,7 @@ def query_ollama(prompt: str) -> str:
         text=True
     )
     return result.stdout.strip()
-
+'''
 def llm_rerank_chunks(question: str, chunks: List[str], top_k: int = 5) -> List[str]:
     if len(chunks) <= top_k:
         return chunks
@@ -68,6 +68,35 @@ Most relevant chunk numbers:
         print(f"⚠️ Reranking failed: {e}, using original order")
         return chunks[:top_k]
 '''
+def llm_rerank_chunks(question: str, chunks: List[Tuple[str, dict]], top_k: int = 5) -> List[Tuple[str, dict]]:
+    if len(chunks) <= top_k:
+        return chunks
+
+    chunk_list = "\n".join([f"[{i}] {chunk[:200]}..." for i, (chunk, _) in enumerate(chunks)])
+    rerank_prompt = f"""
+You are helping to find the most relevant information to answer a question.
+
+Question: {question}
+
+Below are numbered text chunks. Return ONLY the numbers (0-{len(chunks)-1}) of the {top_k} most relevant chunks, in order of relevance. 
+Separate numbers with commas (e.g., "2,5,1,8,3").
+
+Chunks:
+{chunk_list}
+
+Most relevant chunk numbers:
+"""
+    try:
+        response = query_ollama(rerank_prompt)
+        indices = [int(x.strip()) for x in response.split(',') if x.strip().isdigit()]
+        indices = [i for i in indices if 0 <= i < len(chunks)][:top_k]
+        if not indices:
+            return chunks[:top_k]
+        return [chunks[i] for i in indices]
+    except Exception as e:
+        print(f"⚠️ Reranking failed: {e}, using original order")
+        return chunks[:top_k]
+
 def filter_chunk_quality(chunks: List[str], min_words: int = 50) -> List[str]:
     quality_chunks = []
     for chunk in chunks:
@@ -84,7 +113,7 @@ def filter_chunk_quality(chunks: List[str], min_words: int = 50) -> List[str]:
             continue
         quality_chunks.append(chunk)
     return quality_chunks
-'''
+
 def search_semantic_enhanced(question: str, n_results: int = 10, source_filter: str = None, use_reranking: bool = True, top_k: int = 5):
     query_params = {
         "query_texts": [question],
@@ -96,20 +125,31 @@ def search_semantic_enhanced(question: str, n_results: int = 10, source_filter: 
     results = collection.query(**query_params)
     print("📦 Raw Chroma query result:", json.dumps(results, indent=2, default=str))
 
-    chunks = results.get("documents", [[]])[0]
-    if not isinstance(chunks, list):
-        print(f"⚠️ Unexpected format for documents: {type(chunks)} - {chunks}")
+    documents = results.get("documents", [[]])[0]
+    metadatas = results.get("metadatas", [[]])[0]
+
+    if not documents or not metadatas:
         return []
 
-    if not chunks:
-        return []
+    chunk_meta_pairs = list(zip(documents, metadatas))
 
+    # Apply quality filter
     quality_filter = QualityFilter(min_words=50)
-    quality_chunks = quality_filter.filter(chunks)
-    if use_reranking and quality_chunks:
-        quality_chunks = llm_rerank_chunks(question, quality_chunks, top_k=top_k)
+    filtered_pairs = []
+    for chunk, meta in chunk_meta_pairs:
+        if chunk.strip() and len(chunk.split()) >= quality_filter.min_words:
+            if not any(signal in chunk.lower() for signal in quality_filter.boilerplate_signals):
+                cleaned = "\n".join(line.strip() for line in chunk.splitlines() if line.strip())
+                filtered_pairs.append((cleaned, meta))
 
-    return quality_chunks
+    if not filtered_pairs:
+        return []
+
+    # Rerank
+    if use_reranking:
+        filtered_pairs = llm_rerank_chunks(question, filtered_pairs, top_k=top_k)
+
+    return filtered_pairs
 
 def search_keyword_enhanced(question: str, company: str = None, n_results: int = 5):
     """Enhanced search with optional company filtering"""
@@ -245,7 +285,9 @@ def ask_enhanced(question: str, mode: str = "semantic", source_filter: str = Non
             docs = search_semantic_enhanced(question, n_results=n_results, source_filter=source_filter, use_reranking=use_reranking, top_k=top_k)
             if not docs:
                 return "No relevant semantic documents found in your internal data."
-            context = "\n\n".join(docs)
+            context = "\n\n".join( f"[Company: {meta.get('mentioned_companies', 'Unknown')}]\n{chunk}"
+                for chunk, meta in docs
+            )
             context_source = "semantic search of your internal documents"
 
         elif mode == "keyword":
