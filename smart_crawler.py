@@ -127,5 +127,5 @@ async def main(start_urls):
             await crawl_page(playwright, url, url, depth=0)
 
 if __name__ == "__main__":
-    competitor_urls = [f"https://wiz.io"]#[f"https://censys.com","https://shodan.io","https://www.paloaltonetworks.com","https://www.cycognito.com"]
+    competitor_urls = [f"https://www.crowdstrike.com/"]#[f"https://censys.com","https://shodan.io","https://www.paloaltonetworks.com","https://www.cycognito.com"]
     asyncio.run(main(competitor_urls))
