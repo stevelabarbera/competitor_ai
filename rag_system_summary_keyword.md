@@ -1,9 +1,9 @@
-b# RAG System - Semantic Search Stable 🎯
+# RAG System - Semantic Search Stable 🎯
 
 ## Problem Solved
 **BEFORE**:
-- **Losing Context** Documents merged together, losing company context during ingestion.we were merging all of the different companies metadata there into one database and loosing important context that we had just to simply merge it into a chroma db.
-- **Improper Sanitation Data** we were continuing to get data from the database which was a tuple and other various formats which weren't what we were expecting which was strings
+- **Losing Context** Documents merged together, losing company context during ingestion.we were merging all of the different companies metadata there into one database and loosing important context that we had instead should have simply multiple collections for each company add  it into a chroma db.
+- **Improper Sanitation Data** we continued to see errors during pre&post ingestion around expecting string received tuple,array,list,etc.Silent error was very difficult to pinpoint took brute force printouts across scripts.(Do not want to do that again)
 **AFTER**: Clean company-specific search results with preserved context.fixed a number of bugs with sanitation of data both pre-ingestion an post.
 
 ## Architecture Overview
