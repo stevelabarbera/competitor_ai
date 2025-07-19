@@ -128,4 +128,6 @@ async def main(start_urls):
 
 if __name__ == "__main__":
     competitor_urls = [f"https://www.rapid7.com/"]#[f"https://crowdstrike.com","https://censys.com","https://shodan.io","https://www.paloaltonetworks.com","https://www.cycognito.com"]
+    #https://www.bitsight.com/,https://securityscorecard.com/,https://www.recordedfuture.com/
+    #mandiant,intruder,cymulate,armis,bishop fox,IBM
     asyncio.run(main(competitor_urls))
