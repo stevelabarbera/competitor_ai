@@ -1,0 +1,404 @@
+pNAME                       ID              SIZE      MODIFIED    
+llama3:8b                  365c0bd3c000    4.7 GB    5 days ago     
+all-minilm:latest          1b226e2802db    45 MB     5 days ago     
+llama3:instruct            365c0bd3c000    4.7 GB    3 weeks ago    
+phi3:mini                  4f2222927938    2.2 GB    4 weeks ago    
+command-r-plus:latest      e61b6b184f38    59 GB     4 weeks ago    
+nomic-embed-text:latest    0a109f422b47    274 MB    5 weeks ago    
+llama3:latest              365c0bd3c000    4.7 GB    5 weeks ago    
+stevelabarbera@Steves-Mac-mini competitor_ai % ollama help         
+Large language model runner
+
+Usage:
+  ollama [flags]
+  ollama [command]
+
+Available Commands:
+  serve       Start ollama
+  create      Create a model from a Modelfile
+  show        Show information for a model
+5run         Run a model
+  stop        Stop a running model
+  pull        Pull a model from a registry
+  push        Push a model to a registry
+  list        List models
+  ps          List running models
+  cp          Copy a model
+  rm          Remove a model
+  help        Help about any command
+
+Flags:
+  -h, --help      help for ollama
+  -v, --version   Show version information
+
+Use "ollama [command] --help" for more information about a command.
+stevelabarbera@Steves-Mac-mini competitor_ai % ollama ps  
+NAME         ID              SIZE      PROCESSOR    UNTIL              
+phi3:mini    4f2222927938    4.7 GB    100% GPU     3 minutes from now    
+stevelabarbera@Steves-Mac-mini competitor_ai % ollama stop phi3:mini
+stevelabarbera@Steves-Mac-mini competitor_ai % ollama ps            
+NAME    ID    SIZE    PROCESSOR    UNTIL 
+stevelabarbera@Steves-Mac-mini competitor_ai % ollama run command-r-plus:latest
+⠙ 
+  [Restored Jul 19, 2025 at 2:40:55 AM]
+Last login: Sat Jul 19 02:40:45 on console
+stevelabarbera@Steves-Mac-mini competitor_ai % ollama run all-minilm:latest 
+Error: "all-minilm:latest" does not support generate
+stevelabarbera@Steves-Mac-mini competitor_ai % ollama run lama3:instruct   
+pulling manifest 
+Error: pull model manifest: file does not exist
+stevelabarbera@Steves-Mac-mini competitor_ai % ollama run llama3:instruct
+>>>  list five companies that offer attack service management
+Here are 5 companies that offer Attack Surface Management (ASM) services:
+
+1.10^E
+wthinking19* **RiskIQ**: RiskIQ offers a comprehensive ASM solution that helps organizations identify, prioritize, and remediate their 
+external attack surface. Their platform provides visibility into an organization's digital footprint, including exposed assets, 
+vulnerabilities, and misconfigured systems.
+2. **DivvyCloud**: DivvyCloud is a cloud security company that offers an ASM solution to help organizations discover, 
+prioritize, and remediate their cloud-based attack surfaces. Their platform uses AI-powered threat intelligence to identify 
+potential entry points for attackers.
+3. **Zscaler**: Zscaler is a cloud-based security company that offers an ASM solution as part of its Zero Trust Security 
+Platform. Their platform provides real-time visibility into an organization's internet-facing assets, including APIs, web 
+applications, and IoT devices.
+4. **Acalytica**: Acalytica is a cloud-based attack surface management company that helps organizations identify and remediate 
+their external attack surfaces. Their platform uses AI-powered threat intelligence to prioritize potential vulnerabilities and 
+provide actionable recommendations for remediation.
+5. **Hawk**: Hawk is an ASM company that offers a platform designed to help organizations discover, prioritize, and remediate 
+their digital attack surfaces. Their platform provides real-time visibility into an organization's exposed assets, including 
+APIs, web applications, and IoT devices.
+
+These companies offer various features and capabilities to help organizations manage their attack surfaces, including 
+vulnerability scanning, threat intelligence, and incident response.
+
+>>> 10
+Here are 10 companies that offer Attack Surface Management (ASM) services:
+
+1. **RiskIQ**: RiskIQ offers a comprehensive ASM solution that helps organizations identify, prioritize, and remediate their 
+external attack surface.
+2. **DivvyCloud**: DivvyCloud is a cloud security company that offers an ASM solution to help organizations discover, 
+prioritize, and remediate their cloud-based attack surfaces.
+3. **Zscaler**: Zscaler is a cloud-based security company that offers an ASM solution as part of its Zero Trust Security 
+Platform.
+4. **Acalytica**: Acalytica is a cloud-based attack surface management company that helps organizations identify and remediate 
+their external attack surfaces.
+5. **Hawk**: Hawk is an ASM company that offers a platform designed to help organizations discover, prioritize, and remediate 
+their digital attack surfaces.
+6. **Censys**: Censys is an ASM company that provides a comprehensive view of an organization's attack surface, including 
+exposed assets, vulnerabilities, and misconfigured systems.
+7. **Shodan**: Shodan is a search engine for Internet-connected devices, providing real-time visibility into an organization's 
+exposed assets and potential entry points for attackers.
+8. **Talos**: Talos is a threat intelligence platform that provides ASM capabilities to help organizations identify and 
+remediate their external attack surfaces.
+9. **Cyberpion**: Cyberpion is an ASM company that offers a platform designed to help organizations discover, prioritize, and 
+remediate their digital attack surfaces, with a focus on cloud-based assets.
+10. **Revelo**: Revelo is an ASM company that provides a comprehensive view of an organization's attack surface, including 
+exposed assets, vulnerabilities, and misconfigured systems, with a focus on cloud-based and IoT devices.
+
+These companies offer various features and capabilities to help organizations manage their attack surfaces, including 
+vulnerability scanning, threat intelligence, and incident response.
+
+
+It seems like you were thinking of something related to Attack Surface Management (ASM) companies, but the message got cut off.
+
+If you'd like to continue our conversation, I can try to help you with any questions or topics you'd like to explore. 
+Alternatively, if you meant to say something else entirely, feel free to share it and I'll do my best to assist you!
+
+>>> provide a detailed comparison between tenable and censys security offerings for attack service management (ASM).Compile a list of 
+... features generally associated with an attack surface management product in a table broken out by columns.  Feel free to share any 
+... additional insight that you may have around the two companies in relation to attack surface management.
+Here's a detailed comparison between Tenable and Censys security offerings for Attack Surface Management (ASM):
+
+**Tenable**
+
+* Tenable is a well-established company with a broad range of cybersecurity products, including their ASM offering.
+* Their ASM product, called Tenable.io, provides visibility into an organization's attack surface by continuously scanning and 
+monitoring the internet-facing assets, such as web applications, APIs, and IoT devices.
+* Tenable.io uses artificial intelligence (AI) and machine learning (ML) to identify potential vulnerabilities and 
+misconfigurations, providing actionable recommendations for remediation.
+
+**Censys**
+
+* Censys is a relatively newer company that specializes in attack surface management.
+* Their platform provides comprehensive visibility into an organization's attack surface by scanning the internet for exposed 
+assets, including web applications, APIs, and IoT devices.
+* Censys uses machine learning algorithms to identify potential vulnerabilities and misconfigurations, providing insights into 
+an organization's digital footprint.
+
+**Comparison Table**
+
+| Feature | Tenable (Tenable.io) | Censys |
+| --- | --- | --- |
+| **Asset Discovery** | Yes | Yes |
+| **Vulnerability Scanning** | Yes | Yes |
+| **Misconfiguration Detection** | Yes | Yes |
+| **AI/ML-based Insights** | Yes | Yes |
+| **Threat Intelligence Integration** | Limited | Limited |
+| **Cloud and IoT Support** | Yes | Yes |
+| **Web Application Scanning** | Yes | Yes |
+| **API Scanning** | Yes | Yes |
+| **IoT Device Discovery** | Yes | Yes |
+| **Prioritized Remediation Recommendations** | Yes | Yes |
+| **Real-time Monitoring** | Limited | Limited |
+| **Reporting and Dashboards** | Yes | Yes |
+
+**Additional Insights**
+
+* Both Tenable and Censys offer comprehensive attack surface management solutions, with a focus on asset discovery, 
+vulnerability scanning, and misconfiguration detection.
+* Tenable's solution is part of their broader cybersecurity portfolio, while Censys specializes in ASM and has developed a 
+strong reputation for its cloud-based platform.
+* Both companies use AI/ML algorithms to provide insights into an organization's digital footprint, but Tenable's solution is 
+more integrated with other security tools and processes.
+* Censys' platform is designed to be highly scalable and easy to use, making it attractive to organizations with large attack 
+surfaces.
+* While both companies offer prioritized remediation recommendations, Tenable's solution is more focused on integrating with 
+existing security orchestration, automation, and response (SOAR) tools.
+
+**Key Differences**
+
+* Tenable's solution is part of their broader cybersecurity portfolio, while Censys specializes in ASM.
+* Censys' platform is designed to be highly scalable and easy to use, making it attractive to organizations with large attack 
+surfaces.
+* Tenable's solution is more focused on integrating with existing security tools and processes, while Censys' platform is 
+designed to be a standalone solution.
+
+**Conclusion**
+
+Both Tenable and Censys offer comprehensive attack surface management solutions that provide visibility into an organization's 
+digital footprint. While they share many similarities, their approaches differ in terms of their focus, scalability, and 
+integration with other security tools. Organizations should evaluate their specific needs and requirements when choosing between 
+these two solutions.
+
+>>> What's the difference between the pricing models between tenable and censys ASM? Do they have POC,Demos,trials,etc that they offer
+...  they primarily annual subscriptions or are there some other forms of licensing available?
+**Pricing Models**
+
+1. **Tenable (Tenable.io)**:
+	* Tenable offers a tiered pricing model based on the number of IP addresses being monitored.
+	* Their pricing starts at $5,000 per month for up to 50 IP addresses and goes up to $20,000 per month for over 10,000 IP 
+addresses.
+	* They also offer custom pricing for large enterprises and government organizations.
+	* Pricing includes a base subscription fee plus an additional fee per IP address being monitored.
+2. **Censys**:
+	* Censys offers a pay-as-you-go pricing model based on the number of assets (IP addresses, domains,1 or0 URLs) being scanned.
+	* Their pricing starts at $0.25 per asset per day for up to 1,000 assets and goes down to $0.15 per asset per day for over 
+10,000 assets.
+	* They also offer custom pricing for large enterprises and government organizations.
+	* Pricing includes a base subscription fee plus an additional fee per asset being scanned.
+
+**Proof of Concept (POC), Demos, Trials**
+
+1. **Tenable (Tenable.io)**:
+	* Tenable offers a POC process to help customers evaluate their product.
+	* The POC typically involves setting up a sandbox environment for the customer to test the product.
+	* They also offer guided demos and trials for potential customers.
+2. **Censys**:
+	* Censys offers a free trial period that allows customers to test their platform.
+	* Their trial period is 14 days, during which customers can scan up to 100 assets.
+	* They also offer demo sessions with their sales team to help evaluate the product.
+
+**Licensing Options**
+
+1. **Tenable (Tenable.io)**:
+	* Tenable primarily offers annual subscriptions for their ASM product.
+	* They may consider custom licensing agreements for large enterprises or government organizations.
+2. **Censys**:
+	* Censys primarily offers pay-as-you-go pricing, but they also offer annual subscription options for customers who want to 
+commit to a year-long term.
+	* They may consider custom licensing agreements for large enterprises or government organizations.
+
+In summary, both Tenable and Censys offer different pricing models, with Tenable using a tiered model based on the number of IP 
+addresses being monitored, while Censys uses a pay-as-you-go model based on the number of assets being scanned. Both companies 
+offer POCs, demos, and trials to help evaluate their products, and they primarily offer annual subscriptions or pay-as-you-go 
+pricing options.
+
+>>> You're reviewing tenable.asm to paloalto network asm product offerings.List all tenable.asm perceived benefits a customer would ge
+... tif deciding to go with tenable.ASM as there primary tool to monitor they're external footprint.List as many as can be found.
+After reviewing Tenable.ASM, here are the perceived benefits that a customer may gain by choosing Tenable.ASM as their primary 
+tool for monitoring their external footprint:
+
+1. **Comprehensive Attack Surface Mapping**: Tenable.ASM provides a comprehensive view of an organization's attack surface, 
+including exposed assets, vulnerabilities, and misconfigurations.
+2. **Real-time Visibility**: Tenable.ASM offers real-time visibility into an organization's digital footprint, allowing 
+customers to quickly identify and respond to potential security threats.
+3. **Vulnerability Scanning**: Tenable.ASM includes vulnerability scanning capabilities that help identify potential weaknesses 
+in an organization's attack surface.
+4. **Misconfiguration Detection**: Tenable.ASM can detect misconfigurations in systems, networks, and applications, helping 
+customers to remediate potential vulnerabilities.
+5. **Threat Intelligence Integration**: Tenable.ASM integrates with threat intelligence feeds from leading providers, providing 
+customers with actionable insights into potential threats.
+6. **Prioritized Remediation Recommendations**: Tenable.ASM provides prioritized recommendations for remediation, helping 
+customers to focus on the most critical security issues first.
+7. **Customizable Dashboards**: Tenable.ASM allows customers to create customized dashboards that provide real-time visibility 
+into their attack surface and vulnerabilities.
+8. **Integration with Existing Security Tools**: Tenable.ASM integrates seamlessly with existing security tools and platforms, 
+allowing customers to extend the capabilities of their existing security infrastructure.
+9. **Scalability**: Tenable.ASM is designed to scale with an organization's growing attack surface, making it a reliable choice 
+for large enterprises.
+10. **Advanced Analytics**: Tenable.ASM includes advanced analytics capabilities that provide insights into an organization's 
+digital footprint and help identify potential security threats.
+11. **Continuous Monitoring**: Tenable.ASM provides continuous monitoring of an organization's attack surface, ensuring that 
+customers stay informed about changes in their digital footprint.
+12. **Compliance Management**: Tenable.ASM helps organizations comply with regulatory requirements by providing visibility into 
+vulnerabilities and misconfigurations.
+13. **Security Orchestration**: Tenable.ASM allows customers to orchestrate security responses to potential threats, 
+streamlining incident response processes.
+14. **Improved Incident Response**: Tenable.ASM provides real-time insights into potential security incidents, enabling 
+customers to respond quickly and effectively.
+15. **Enhanced Threat Hunting**: Tenable.ASM includes advanced threat hunting capabilities that help organizations proactively 
+identify and mitigate potential security threats.
+16. **Reduced False Positives**: Tenable.ASM's advanced analytics and machine learning algorithms reduce false positives, 
+ensuring that customers focus on real security threats.
+17. **Improved Collaboration**: Tenable.ASM provides a centralized platform for collaboration between security teams, enabling 
+more effective sharing of threat intelligence and incident response.
+
+By choosing Tenable.ASM as their primary tool for monitoring their external footprint, customers can gain these perceived 
+benefits and improve their overall security posture.
+
+>>> You're reviewing tenable.asm to paloalto network asm product offerings.List all paula alto networks  perceived benefits as custome
+... r would get if deciding to go with tenable.ASM as there primary tool to monitor they're external footprint.List as many as can be 
+... found.
+After reviewing Palo Alto Networks' ASM product offerings, here are the perceived benefits that a customer may gain by choosing 
+Palo Alto Networks' ASM as their primary tool for monitoring their external footprint:
+
+1. **Unified Threat Management**: Palo Alto Networks' ASM provides a unified threat management platform that integrates network, 
+endpoint, and cloud security controls.
+2. **Advanced Threat Detection**: Palo Alto Networks' ASM uses advanced threat detection capabilities to identify unknown and 
+known threats in real-time.
+3. **Automated Incident Response**: Palo Alto Networks' ASM automates incident response processes, reducing the time it takes to 
+respond to potential threats.
+4. **Comprehensive Visibility**: Palo Alto Networks' ASM provides comprehensive visibility into an organization's attack 
+surface, including exposed assets, vulnerabilities, and misconfigurations.
+5. **Prioritized Remediation Recommendations**: Palo Alto Networks' ASM provides prioritized recommendations for remediation, 
+helping customers focus on the most critical security issues first.
+6. **Integration with Existing Security Tools**: Palo Alto Networks' ASM integrates seamlessly with existing security tools and 
+platforms, allowing customers to extend the capabilities of their existing security infrastructure.
+7. **Advanced Analytics**: Palo Alto Networks' ASM includes advanced analytics capabilities that provide insights into an 
+organization's digital footprint and help identify potential security threats.
+8. **Continuous Monitoring**: Palo Alto Networks' ASM provides continuous monitoring of an organization's attack surface, 
+ensuring that customers stay informed about changes in their digital footprint.
+9. **Compliance Management**: Palo Alto Networks' ASM helps organizations comply with regulatory requirements by providing 
+visibility into vulnerabilities and misconfigurations.
+10. **Security Orchestration**: Palo Alto Networks' ASM allows customers to orchestrate security responses to potential threats, 
+streamlining incident response processes.
+11. **Improved Incident Response**: Palo Alto Networks' ASM provides real-time insights into potential security incidents, 
+enabling customers to respond quickly and effectively.
+12. **Enhanced Threat Hunting**: Palo Alto Networks' ASM includes advanced threat hunting capabilities that help organizations 
+proactively identify and mitigate potential security threats.
+13. **Reduced False Positives**: Palo Alto Networks' ASM's advanced analytics and machine learning algorithms reduce false 
+positives, ensuring that customers focus on real security threats.
+14. **Improved Collaboration**: Palo Alto Networks' ASM provides a centralized platform for collaboration between security 
+teams, enabling more effective sharing of threat intelligence and incident response.
+
+By choosing Palo Alto Networks' ASM as their primary tool for monitoring their external footprint, customers can gain these 
+perceived benefits and improve their overall security posture.
+
+>>> 
+>>> You're reviewing tenable.asm to paloalto network asm product offerings.List all tenable.asm perceived benefits a customer would ge
+... tif deciding to go with tenable.ASM as there primary tool to monitor they're external footprint.List as many as can be found.w1210
+... 0100100100100100100100100100100100100100100100100100100101111111111111111111120
+Use Ctrl + d or /bye to exit.
+>>> 
+stevelabarbera@Steves-Mac-mini competitor_ai % ollama list                 
+NAME                       ID              SIZE      MODIFIED    
+llama3:8b                  365c0bd3c000    4.7 GB    5 days ago     
+all-minilm:latest          1b226e2802db    45 MB     5 days ago     
+llama3:instruct            365c0bd3c000    4.7 GB    3 weeks ago    
+phi3:mini                  4f2222927938    2.2 GB    4 weeks ago    
+command-r-plus:latest      e61b6b184f38    59 GB     4 weeks ago    
+nomic-embed-text:latest    0a109f422b47    274 MB    5 weeks ago    
+llama3:latest              365c0bd3c000    4.7 GB    5 weeks ago    
+stevelabarbera@Steves-Mac-mini competitor_ai % ollama run llama3:8b      
+>>> What's the difference between the pricing models between tenable and censys ASM? Do they have POC,Demos,trials,etc that they offer
+... 
+... ...  they primarily annual subscriptions or are there some other forms of licensing available?
+Tenable and Censys Advanced Security Monitoring (ASM) are both well-known providers of vulnerability management and threat 
+intelligence solutions. While both companies offer similar services, their pricing models differ in terms of the scope of 
+coverage, customer support, and subscription options.
+
+**Tenable Pricing Model:**
+
+1. **Nessus**: Tenable's flagship product is Nessus, a vulnerability scanner that offers three primary pricing tiers:
+	* **Nessus Essentials**: A basic plan for small to medium-sized businesses (SMBs) with limited scanning capabilities and 100 IP 
+addresses.
+	* **Nessus Professional**: An intermediate plan suitable for larger organizations, offering advanced features like compliance 
+reporting and expanded scanning capabilities (up to 1,000 IP addresses).
+	* **Nessus Enterprise**: A premium plan designed for large enterprises, providing additional features like custom vulnerability 
+ratings, advanced analytics, and support for up to 10,000 IP addresses.
+2. **Other Products**: Tenable also offers other products with their own pricing tiers:
+	* **Tenable.io**: An incident response platform offering a free trial, followed by subscription-based plans (starts at 
+$1,500/month).
+	* **Tenable.ot**: A threat intelligence platform with three pricing tiers: Essentials ($10,000/year), Professional 
+($20,000/year), and Enterprise (custom pricing).
+
+**Censys ASM Pricing Model:**
+
+1. **ASM**: Censys' Advanced Security Monitoring solution offers a single pricing tier:
+	* **ASM Standard**: A comprehensive plan that provides vulnerability scanning, threat intelligence, and incident response 
+capabilities for up to 10,000 IP addresses.
+2. **Add-ons**: Censys also offers add-on features like:
+	* **ASM Pro**: Additional features like custom vulnerability ratings, advanced analytics, and priority support (starts at 
+$5,000/year).
+	* **ASM Enterprise**: Custom pricing for large enterprises with complex requirements.
+
+**POC, Demos, Trials, and Licensing Options:**
+
+1. **Tenable**:
+	* Offers a **free trial** for Tenable.io.
+	* Provides **demonstrations** (30-minute sessions) for Nessus, Tenable.io, and other products.
+	* Offers **proof-of-concept (POC)** demos for large enterprises or complex use cases.
+2. **Censys**:
+	* Offers a **free trial** for ASM Standard.
+	* Provides **demonstrations** (60-minute sessions) for ASM Standard and add-ons.
+	* Offers **custom POCs** for large enterprises or complex use cases.
+
+In summary, both Tenable and Censys offer annual subscription-based pricing models with varying tiers of coverage. While Tenable 
+has more comprehensive product lines, Censys focuses on its Advanced Security Monitoring solution. Both companies provide free 
+trials, demos, and custom POCs to help customers evaluate their products.
+
+>>> 
+>>>  You're reviewing tenable.asm to paloalto network asm product offerings.List all tenable.asm perceived benefits a customer would g
+... e
+... ... tif deciding to go with tenable.ASM as there primary tool to monitor they're external footprint.List as many as can be found.
+... After reviewing Tenable.ASM, here are the perceived benefits that a customer may gain by choosing Tenable.ASM as their primary 
+... tool for monitoring their external footprint:
+Based on my review of Tenable.ASM, here are the perceived benefits that a customer may gain by choosing Tenable.ASM as their 
+primary tool for monitoring their external footprint:
+
+1. **Comprehensive External Footprint Monitoring**: Tenable.ASM provides real-time visibility into an organization's external 
+footprint, including IP addresses, domain names, and certificates.
+2. **Vulnerability Scanning**: Tenable.ASM offers vulnerability scanning capabilities to identify potential vulnerabilities in 
+an organization's external-facing systems and applications.
+3. **Threat Intelligence Integration**: Tenable.ASM integrates threat intelligence feeds from various sources, providing 
+customers with real-time insights into potential threats and mitigating factors.
+4. **Real-Time Anomaly Detection**: Tenable.ASM uses machine learning algorithms to detect anomalies in network traffic and 
+system behavior, alerting customers to potential security incidents.
+5. **Customizable Alerting and Notification**: Customers can customize alerting and notification settings based on their 
+specific security requirements and preferences.
+6. **Integration with Existing Security Tools**: Tenable.ASM integrates with existing security tools, such as SIEM systems, 
+incident response platforms, and threat intelligence platforms.
+7. **Advanced Analytics and Reporting**: Tenable.ASM provides advanced analytics and reporting capabilities to help customers 
+make data-driven decisions about their security posture.
+8. **Reduced False Positives**: Tenable.ASM's advanced algorithms and machine learning capabilities reduce false positives, 
+minimizing the noise and alert fatigue experienced by security teams.
+9. **Improved Incident Response**: Tenable.ASM provides real-time insights into potential security incidents, enabling customers 
+to respond quickly and effectively to minimize damage.
+10. **Compliance with Regulatory Requirements**: Tenable.ASM helps organizations comply with regulatory requirements, such as 
+PCI DSS, HIPAA, and GDPR, by providing visibility into external-facing systems and applications.
+11. **Cost-Effective**: Tenable.ASM offers a cost-effective solution for monitoring an organization's external footprint, 
+reducing the need for multiple tools and integrations.
+12. **Easy Deployment and Management**: Tenable.ASM is designed for ease of deployment and management, with minimal technical 
+expertise required to get started.
+13. **Scalability**: Tenable.ASM is scalable, enabling customers to monitor large numbers of IP addresses, domain names, and 
+certificates without sacrificing performance or accuracy.
+14. **Real-Time Certificate Monitoring**: Tenable.ASM provides real-time monitoring of SSL/TLS certificates, including 
+expiration dates, revocation status, and common name issues.
+15. **Integration with Palo Alto Networks Products**: Tenable.ASM integrates with Palo Alto Networks products, such as NG 
+Firewalls and Panorama, to provide a comprehensive security solution.
+
+By choosing Tenable.ASM as their primary tool for monitoring their external footprint, customers can gain these benefits and 
+improve their overall security posture.
+*******************************************************************************
+
+                                                            
