@@ -1,4 +1,4 @@
-def you():# fixed_ingestion.py (now using unified ingestion_driver_update)
+# fixed_ingestion.py (now using unified ingestion_driver_update)
 
 import os
 import chromadb
