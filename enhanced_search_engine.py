@@ -316,6 +316,17 @@ def ask_enhanced(question: str, mode: str = "semantic", source_filter: str = Non
         elif mode == "full":
             try:
                 context = FULL_CONTEXT_FILE.read_text(encoding="utf-8")
+                # Optional: trim to max tokens using your PromptTrimmer
+
+                from full_context_tools import PromptTrimmer
+
+                trimmer = PromptTrimmer(max_tokens=8000)
+                context = trimmer.trim(context.split("\n\n"))
+
+
+
+                context_source = "full context file (structured + trimmed)"                
+                context = FULL_CONTEXT_FILE.read_text(encoding="utf-8")
                 context_source = "full context file"
             except Exception as e:
                 return f"❌ Failed to load full context: {e}"

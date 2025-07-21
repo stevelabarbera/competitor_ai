@@ -237,7 +237,9 @@ def ask_enhanced(question: str, mode: str = "semantic", source_filter: str = Non
             docs = search_semantic_enhanced(question, n_results=n_results, source_filter=source_filter, use_reranking=use_reranking, top_k=top_k)
             if not docs:
                 return "No relevant semantic documents found in your internal data."
-            context = "\n\n".join(docs)
+                    scontext = "\n\n".join( f"[Company: {meta.get('mentioned_companies', 'Unknown')}]\n{chunk}"
+                for chunk, meta in docs
+            ) 
             context_source = "semantic search of your internal documents"
 
         elif mode == "keyword":
@@ -266,33 +268,45 @@ def ask_enhanced(question: str, mode: str = "semantic", source_filter: str = Non
         elif mode == "full":
             try:
                 context = FULL_CONTEXT_FILE.read_text(encoding="utf-8")
-                context_source = "full context file"
+
+                # Optional: trim to max tokens using your PromptTrimmer
+                from full_context_tools import PromptTrimmer
+                trimmer = PromptTrimmer(max_tokens=8000)
+                context = trimmer.trim(context.split("\n\n"))
+
+                context_source = "full context file (structured + trimmed)"
             except Exception as e:
                 return f"❌ Failed to load full context: {e}"
         else:
             return "❌ Invalid mode selected."
 
-        final_prompt = f"""
-You are a competitive intelligence assistant specializing in cybersecurity vendors. You have access to internal company documents and competitor analysis.
+            final_prompt = f"""
+                You are a competitive intelligence assistant specializing in cybersecurity vendors.
 
-CRITICAL INSTRUCTIONS:
-1. ONLY use information from the provided context below
-2. Do NOT use your general knowledge about companies or products
-3. If the context doesn't contain the answer, respond: "This information is not available in the current internal documents."
-4. Always cite your sources using the format [source_name]
-5. Be specific and factual - avoid speculation
-6. Focus on competitive intelligence insights, pricing, and product comparisons
+                You will be provided a series of structured document excerpts below. Each block starts with:
+                  - A `### Source:` line
+                  - Followed by [Company: ...] and other metadata
+                  - Ends with `--- END SOURCE ---`
 
-CONTEXT SOURCE: {context_source}
+                CRITICAL INSTRUCTIONS:
+                1. ONLY answer using facts from the context below
+                2. DO NOT hallucinate or use general knowledge
+                3. Cite source documents using [filename] format (from the `### Source:` line)
+                4. If the answer isn't in the context, say: "Not enough information available in the current context."
+                5. Focus on competitive intelligence insights, pricing, and product comparisons
 
---- START OF INTERNAL CONTEXT ---
-{context}
---- END OF INTERNAL CONTEXT ---
+                --- START OF CONTEXT ---
+                {context}
+                --- END OF CONTEXT ---
 
-QUESTION: {question}
+                QUESTION: {question}
 
-ANSWER (based only on the context above):
-"""
+                ANSWER (based only on the context above):
+                """
+
+
+
+
         print(f"🔍 Using {mode} mode with {len(context)} characters of context")
         if company:
             print(f"🏢 Filtering by company: {company}")
@@ -307,7 +321,6 @@ ANSWER (based only on the context above):
 # Usage examples:
 # python script.py --question "What is their revenue?" --mode keyword --company "Apple"
 # python script.py --question "pricing strategy" --mode hybrid --company "Microsoft"
-
 '''
 def search_keyword_enhanced(question: str, n_results: int = 5):
     with ix.searcher() as searcher:
@@ -323,6 +336,8 @@ def search_keyword_enhanced(question: str, n_results: int = 5):
         quality_chunks = quality_filter.filter(chunks)
 
         return filter_chunk_quality(quality_chunks)
+'''
+
 '''
 def ask_enhanced(question: str, mode: str = "semantic", source_filter: str = None, use_reranking: bool = True, n_results: int = 10, top_k: int = 5) -> str:
     try:
@@ -396,7 +411,7 @@ ANSWER (based only on the context above):
         print("💥 Full traceback:")
         traceback.print_exc()
         return f"❌ Error during {mode} search: {e}"
-
+'''
 def ask(question: str, mode: str = "semantic") -> str:
     return ask_enhanced(question, mode=mode)
 
@@ -425,7 +440,9 @@ def ask_enhanced(question: str, mode: str = "semantic", source_filter: str = Non
             docs = search_semantic_enhanced(question, n_results=n_results, source_filter=source_filter, use_reranking=use_reranking, top_k=top_k)
             if not docs:
                 return "No relevant semantic documents found in your internal data."
-            context = "\n\n".join(docs)
+            context = "\n\n".join( f"[Company: {meta.get('mentioned_companies', 'Unknown')}]\n{chunk}"
+                for chunk, meta in docs
+            )
             context_source = "semantic search of your internal documents"
 
         elif mode == "keyword":
@@ -503,8 +520,18 @@ if __name__ == "__main__":
     parser.add_argument("--slow", action="store_true", help="Use slow mode (lower RAM usage)")
     args = parser.parse_args()
 
+
     # Convert hyphenated argument to underscore for function parameter
     company_matching = args.company_matching
+
+
+    SLOW_MODE = args.slow
+    SEMANTIC_RESULTS_LIMIT = 4 if SLOW_MODE else 10
+    RERANK_TOP_K = 2 if SLOW_MODE else 5
+
+    print(f"🔧 Using embedding model: {get_model_name()} ,Matching company: {company_matching}")
+    print(f"Using slow mode: {SLOW_MODE},  RERANK_TOP_K:{RERANK_TOP_K}")
+    print("✅ Found existing collection: competitor_docs")
 
     answer = ask_enhanced(
         question=args.question,
@@ -522,7 +549,6 @@ if __name__ == "__main__":
 # python script.py --question "revenue" --company "Apple" --mode keyword
 # python script.py --question "revenue" --company "Apple" --mode keyword --company-matching fuzzy
 # python script.py --question "revenue" --company "AAPL" --mode hybrid --company-matching fuzzy
-
 
 
 
