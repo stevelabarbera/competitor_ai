@@ -1,5 +1,6 @@
 import os
 import argparse
+
 from pathlib import Path
 import chromadb
 from chromadb.config import Settings
@@ -178,10 +179,44 @@ def search_keyword_enhanced(question: str, company: str = None, n_results: int =
         
         # Step 4: Extract and filter (your existing logic)
         chunks = [hit["content"] for hit in hits]
+
         quality_filter = QualityFilter(min_words=50)
         quality_chunks = quality_filter.filter(chunks)
         
         return filter_chunk_quality(quality_chunks)
+
+
+
+
+def get_source_label(path: str) -> str:
+    if path.startswith("output/"):
+        return "Company Website"
+    elif path.startswith("internal_data/"):
+        return "Internal Document"
+    return "Unknown Source"
+
+def ask_enhanced(...):
+    ...
+    # Run the search and get results (chunks, metadatas, etc.)
+    chunks = ...
+    metadatas = ...
+
+    # Optional: rerank if enabled
+    ...
+
+    # Append source information
+    if chunks and metadatas:
+        source_paths = [m.get("path", "") for m in metadatas]
+        labels = [get_source_label(p) for p in source_paths]
+        label_counts = {label: labels.count(label) for label in set(labels)}
+
+        label_summary = "\n\n📄 Sources:\n"
+        for label, count in label_counts.items():
+            label_summary += f"- {label}: {count} chunk{'s' if count > 1 else ''}\n"
+
+        answer += label_summary
+
+    return answer
 
 # Update your ask_enhanced function to pass company parameter
 def ask_enhanced(question: str, mode: str = "semantic", source_filter: str = None, 
