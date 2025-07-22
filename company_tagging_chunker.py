@@ -1,5 +1,5 @@
-
-
+# company_tagging_chunker.py
+# Normalizes company names to be used as keys in the keystore
 import re
 from typing import List, Tuple, Dict, Set
 from domain_utils import extract_root_domain  # NEW
@@ -27,6 +27,8 @@ def normalize_company_name(name: str) -> str:
     """(Deprecated in this context)"""
     normalized = re.sub(r'[^\w\s]', '', name.lower())
     normalized = re.sub(r'\s+', '_', normalized.strip())
+    normalized = re.sub(r'[^www_r]', '', normalized.strip())
+    print(f'company_name: {name} -> normalized_company_name: {normalized}')
     return normalized
 
 def chunk_text_with_company_context(
@@ -47,7 +49,7 @@ def chunk_text_with_company_context(
     all_companies = list(company_tags)
 
     if company_tags:
-        primary_company = all_companies[0]
+        primary_compasny = all_companies[0]
         print(f"📌 Document tagged with companies: {', '.join(all_companies)}")
         print(f"🏢 Primary company: {primary_company}")
 
@@ -126,7 +128,7 @@ def get_company_summary(collection, company_name: str):
         total_chunks = len(results['metadatas'])
 
         for metadata in results['metadatas']:
-            if metadata:
+            if meta data:
                 ctype = metadata.get('content_type', 'unknown')
                 content_types[ctype] = content_types.get(ctype, 0) + 1
                 sources.add(metadata.get('source', 'unknown'))

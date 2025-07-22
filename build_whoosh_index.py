@@ -43,7 +43,7 @@ def build_whoosh_index():
     writer = ix.writer()
 
     all_docs = collect_documents_from_directory(INTERNAL_DATA_DIR) + collect_documents_from_directory(OUTPUT_DIR)
-
+    print(f"build_woosh_index -> collect_documents_from_directory() -> all_docs: {all_docs}")
     for company, path, content in all_docs:
         writer.add_document(company=company, path=path, content=content)
 

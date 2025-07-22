@@ -69,7 +69,7 @@ def enrich_search_results(search_results):
             'company_info': company_info
         })
     return enriched
-
+'''
 # 4. Smart company matching
 def normalize_company_name(user_input):
     """Handle fuzzy company name matching"""
@@ -85,7 +85,7 @@ def normalize_company_name(user_input):
         
         # Return best match or None
         return results[0]['company_id'] if results else None
-
+'''
 # Integration with main search
 def search_with_company_filter(question, company_input=None, n_results=5):
     """Enhanced search with company metadata"""
