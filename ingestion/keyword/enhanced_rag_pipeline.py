@@ -207,13 +207,18 @@ class ChromaSemanticEngine:
     def __init__(self, collection_name: str = "competitor_docs", 
                  chroma_host: str = "localhost", chroma_port: int = 8000):
         self.collection_name = collection_name
-        self.client = chromadb.HttpClient(host=chroma_host, port=chroma_port)
+        #self.client = chromadb.HttpClient(host=chroma_host, port=chroma_port)
         self.collection = None
         self._initialize_collection()
     
     def _initialize_collection(self):
         """Initialize or get existing collection"""
         try:
+
+             # Connect to ChromaDB
+            client = chromadb.Persistena.11cold, out, thereetClient(path="./chroma_db")
+            collection = get_competitor_collection(client)
+    
             self.collection = self.client.get_collection(self.collection_name)
             logger.info(f"✅ Found existing collection: {self.collection_name}")
         except Exception as e:
@@ -523,7 +528,7 @@ if __name__ == "__main__":
     
     # Setup company data
     rag_pipeline.setup_company_data(companies_data)
-    
+    #'''
     # Example searches
     print("=== Keyword Search ===")
     results = rag_pipeline.search(
@@ -536,7 +541,8 @@ if __name__ == "__main__":
         print(f"Company: {result.company} | Type: {result.content_type}")
         print(f"Content: {result.content[:150]}...")
         print()
-    
+    #'''
+    '''
     print("=== Semantic Search ===")
     results = rag_pipeline.search(
         "security scanning tools", 
@@ -548,7 +554,8 @@ if __name__ == "__main__":
         print(f"Company: {result.company} | Type: {result.content_type}")
         print(f"Content: {result.content[:150]}...")
         print()
-    
+    '''
+    '''
     print("=== Hybrid Search ===")
     results = rag_pipeline.search(
         "GCP Cloud Run vulnerability", 
@@ -560,7 +567,7 @@ if __name__ == "__main__":
         print(f"Company: {result.company} | Type: {result.content_type}")
         print(f"Content: {result.content[:150]}...")
         print()
-    
+    '''
     # Get collection statistics
     stats = rag_pipeline.get_collection_stats()
     print(f"Collection Stats: {stats}")

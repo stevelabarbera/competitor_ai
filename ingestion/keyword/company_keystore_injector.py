@@ -41,3 +41,6 @@ class CompanyKeystoreIngester(BaseIngester):
                 "domain": f"{cid}.com"
             })
         self.keystore.populate_from_data(records)
+if __name__ == "__main__":
+keyword_store = CompanyKeystoreIngester()
+keyword_store.ingest_documents(files)
