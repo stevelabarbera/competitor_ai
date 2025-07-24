@@ -283,7 +283,7 @@ class EnhancedRAGPipeline:
         # Get results from both engines
         keyword_results = self.keyword_engine.search(question, company_id, n_results * 2)
         semantic_results = self.semantic_engine.search(question, company_id, n_results * 2)
-        
+  you/book/play      
         # Combine and rerank results
         combined_results = {}
         

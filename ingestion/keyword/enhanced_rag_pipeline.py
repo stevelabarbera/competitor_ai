@@ -10,6 +10,7 @@ from whoosh.analysis import StandardAnalyzer, KeywordAnalyzer
 import chromadb
 from chromadb.config import Settings
 import numpy as np
+from embedding_config import get_competitor_collection
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -120,14 +121,18 @@ class CompanyKeystore:
         try:
             writer = self.ix.writer()
             for company in companies_data:
+                tag_stuff = ','.join(company.get('tags', []))
+                print(f'tags: {tag_stuff} | company_domain: {company.get("domain","")} | schema: {self.schema}')
+                company_name = company.get("domain","")
+                logger.warning(f'company_name: {company.get("domain","")}')
                 writer.add_document(
                     company_id=company['id'],
                     company_name=company['name'],
                     aliases=','.join(company.get('aliases', [])),
                     industry=company.get('industry', ''),
                     doc_count=company.get('document_count', 0),
-                    tags=','.join(company.get('tags', [])),
-                    domain=company.get('domain', '')
+                    tags='test',
+                    domain=company_name
                 )
             writer.commit()
             logger.info(f"Populated company index with {len(companies_data)} companies")
@@ -207,7 +212,7 @@ class ChromaSemanticEngine:
     def __init__(self, collection_name: str = "competitor_docs", 
                  chroma_host: str = "localhost", chroma_port: int = 8000):
         self.collection_name = collection_name
-        #self.client = chromadb.HttpClient(host=chroma_host, port=chroma_port)
+        self.client = None #chromadb.HttpClient(host=chroma_host, port=chroma_port)
         self.collection = None
         self._initialize_collection()
     
@@ -216,10 +221,9 @@ class ChromaSemanticEngine:
         try:
 
              # Connect to ChromaDB
-            client = chromadb.Persistena.11cold, out, thereetClient(path="./chroma_db")
-            collection = get_competitor_collection(client)
+            self.client = chromadb.PersistentClient(path="./chroma_db")
+            self.collection = get_competitor_collection(self.client)
     
-            self.collection = self.client.get_collection(self.collection_name)
             logger.info(f"✅ Found existing collection: {self.collection_name}")
         except Exception as e:
             logger.warning(f"Collection {self.collection_name} not found: {e}")
@@ -343,7 +347,7 @@ class EnhancedRAGPipeline:
                 # Try to extract from path-like input
                 if '_com' in company_input or '/' in company_input:
                     company_id = self.company_keystore.extract_company_from_path(company_input)
-                
+                print(f'attempting to extract company id from path "{company_input}" found company_id: {company_id}')
                 if not company_id:
                     logger.warning(f"Company '{company_input}' not found, searching without filter")
             else:
@@ -512,7 +516,6 @@ def search_with_context(pipeline: EnhancedRAGPipeline, question: str,
 if __name__ == "__main__":
     # Initialize the enhanced RAG pipeline
     rag_pipeline = create_rag_pipeline()
-    
     # Example company data matching your domain structure
     companies_data = [
         {
@@ -523,19 +526,45 @@ if __name__ == "__main__":
             "domain": "tenable.com",
             "document_count": 285,
             "tags": ["security", "vulnerability", "public"]
+        },
+        {
+            "id": "censys",
+            "name": "Censys Inc.",
+            "aliases": ["Censys", "Censys.com","censys.io","Census technologies"],
+            "industry": "Cybersecurity",
+            "domain": "censys.com",
+            "document_count": 285,
+            "tags": ["security", "vulnerability", "public"]
+        },
+        {
+            "id": "shodan",
+            "name": "Shodan",
+            "aliases": ["Shodan IO", "shodan.com","shodann.io","shody"],
+            "industry": "Search Engine",
+            "domain": "Shodan.com",
+            "document_count": 285,
+            "tags": ["security", "vulnerability", "public","iot","Cyber Search Engine"]
         }
-    ]
+    ]   
     
+    keyword_pipeline = KeywordSearchEngine()
+    keyword_pipeline.set_up_company_data(companies_data)
+    keyword_pipeline.populate_from_data()
     # Setup company data
     rag_pipeline.setup_company_data(companies_data)
+    print(f'Setup Company Data Complete!!!!!!!!!!!')
     #'''
     # Example searches
+    #'''
+    rag_pipeline.find_company
     print("=== Keyword Search ===")
     results = rag_pipeline.search(
-        "vulnerability assessment", 
-        company_input="tenable", 
+        "iot", 
+        company_input="shody", 
         search_type="keyword"
     )
+    print(f"=== Keyword Search ===: {results}")
+
     for result in results['results']:
         print(f"Score: {result.score:.3f} | Source: {result.source}")
         print(f"Company: {result.company} | Type: {result.content_type}")

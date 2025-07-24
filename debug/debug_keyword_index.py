@@ -48,8 +48,8 @@ def debug_index(index_dir):
                 print(f"  {k}: {v}")
 
             print("\n✅ Index scan complete.")
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"⚠️ Debug Whoosh Exception - {e}")
 
 
 if __name__ == "__main__":

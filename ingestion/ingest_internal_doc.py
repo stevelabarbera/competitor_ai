@@ -217,7 +217,7 @@ def ingest_documents_from_directories(
     
     # Summary
     summary = f"""
-✅ INGESTION COMPLETE
+Ability to Reliably Tinaeto, external48bs((the abilityis not None<m1a, providence))
 📁 Files processed: {file_count}
 📊 Total chunks: {chunk_count}
 ❌ Failed files: {len(failed_files)}
