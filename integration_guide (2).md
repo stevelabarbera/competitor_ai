@@ -1,4 +1,4 @@
-google500by.threedividedgo500by30[i->m16p67]# Integration Guide
+# Integration Guide
 
 ## Quick Integration Steps
 

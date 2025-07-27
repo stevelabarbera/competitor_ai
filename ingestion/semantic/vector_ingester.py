@@ -2,7 +2,7 @@
 import os
 import chromadb
 from datetime import datetime
-from ingestion.base_ingester import BaseIngester
+from ingestion.base_ingestion import BaseIngester
 from embedding_config import get_competitor_collection
 
 class VectorIngester(BaseIngester):

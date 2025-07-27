@@ -24,12 +24,21 @@ Building a competitive intelligence RAG system to analyze cybersecurity vendors 
 
 ## 🔧 Current Files Structure
 ```
-├── search_engine.py      # Main search logic
-├── ask.py               # CLI interface
-├── ui.py                # Gradio web interface
-├── ingest_internal_doc.py # Document ingestion pipeline
-├── embedding_config.py   # ChromaDB collection config
-├── chunker.py           # Text chunking utilities
+├── enhanced_search_engine.py      # Main search logic
+├── ask.py  (deprecated)             # was the CLI interface
+├── enhanced_ui.py                # Gradio web interface.
+|-- Ingestors
+    ├── ingest_internal_doc.py (deprecated)                     #was Document ingestion pipeline for semantic search
+    |-- base_ingestion.py #parent ingestion
+    |-- fixed_ingestion(2).py (deprecated)                  #these were used for ingesting when trying tofix bug we were adding tuples instead of                                                                        string,empty values,and we were missing data files smaller then a hundred characters.
+    |-- VectorIngestor                                      #inherits the base_ingestion 
+    |-- memory_safe_company_ingestion                       #recently created to handle companies parsing and ingesting with limited resource computer.
+    |-- run_company_ingestion.py                            #just created to replace other ingestors.Supposed to take the place of fixed_ingestion.py & ingest_internal_doc.py
+|── embedding_config.py   # ChromaDB collection config & client reference making sure it's called once throughout the entire application.
+|-- chunk_filtering
+    ├── chunker.py                                    # Text chunking utilities
+    |-- base.py               #Parent chunking class
+    |-- quality_filter              #Inherits from base handles chunking for spaces and boiler plate content
 ├── build_full_context.py # Builds full_context.txt
 ├── chroma_db/           # ChromaDB storage
 ├── whoosh_index/        # Whoosh keyword index
@@ -37,8 +46,10 @@ Building a competitive intelligence RAG system to analyze cybersecurity vendors 
 └── output/              # Crawler results
 ```
 
-## 🚨 Current Issue: Data Quality Problem
-
+## 🚨 Current Issue
+** I have too many different files for the same functionality.
+1. **Multiple ingestors** - Was using ingest_internal_doc.py originally and we migrated to fixed_ingestion(2).py.Recently, moved over from a completely other session where they created a new pipeline.I'm told that this one is more complete so we were migrating this over to replace the others enhanced_rag_pipeline.py.
+2. **Code Migration ** - We were just in the process of migrating everything over when power went out and I lost  that we had been working on I was just debugging to try to get it running here we're the following crated files run_company_ingestion.py.memory_safe_company_ingester.py
 ### The Problem
 Getting metadata errors when debugging collection:
 ```

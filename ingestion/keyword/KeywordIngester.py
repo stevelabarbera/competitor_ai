@@ -3,7 +3,13 @@ from pathlib import Path
 from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, TEXT, ID, NUMERIC, KEYWORD
 from whoosh.analysis import StandardAnalyzer
-from ingestion.base_ingester import BaseIngester
+from ingestion.base_ingesture import BaseIngester
+
+# Paths
+ROOT_DIR = Path(__file__).resolve().parent
+WHOOSH_INDEX_DIR = ROOT_DIR / "whoosh_index"
+INTERNAL_DATA_DIR = ROOT_DIR / "internal_data"
+OUTPUT_DIR = ROOT_DIR / "output"
 
 def extract_company_id(path: str) -> str:
     parts = Path(path).parts
@@ -68,5 +74,29 @@ class KeywordIngester(BaseIngester):
                     )
         writer.commit()
 
-    def flush_batch(self):
-        pass  # Already committed in ingest
+
+# Document collector (from your existing logic)
+def _collect_documents_from_directory(base_dir):
+    documents = []
+    for dirpath, _, filenames in os.walk(base_dir):
+        for filename in filenames:
+            if filename.endswith(".txt"):  # Ignore PDFs for Whoosh index
+                full_path = Path(dirpath) / filename
+                try:
+                    with open(full_path, "r", encoding="utf-8") as f:
+                        text = f.read().strip()
+                    company = Path(dirpath).relative_to(base_dir).parts[0]
+                    documents.append((company, str(full_path), text))
+                except Exception as e:
+                    print(f"⚠️ Could not read {full_path}: {e}")
+    return documents
+
+# Build the index
+def build_whoosh_index(self):
+    all_docs = _collect_documents_from_directory(INTERNAL_DATA_DIR) + _collect_documents_from_directory(OUTPUT_DIR)
+    self.ingest_documents(all_docs)
+    #print(f"build_woosh_index -> collect_documents_from_directory() -> all_docs: {all_docs}")
+
+
+if __name__ == "__main__":
+    build_whoosh_index()
