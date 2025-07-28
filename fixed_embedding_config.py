@@ -23,6 +23,37 @@ def get_shared_embedding_function():
     print(f"🔧 Using embedding model: {model_name}")
     return OllamaEmbeddingFunction(model_name=model_name)
 
+
+
+def get_competitor_collection(client, collection_name="competitor_docs", create_if_not_exists=True):
+    """
+    Get or create a named collection with proper error handling.
+    """
+    embedding_function = get_shared_embedding_function()
+
+    try:
+        collection = client.get_collection(
+            name=collection_name,
+            embedding_function=embedding_function
+        )
+        print(f"✅ Found existing collection: {collection_name}")
+        return collection
+
+    except Exception as e:
+        if create_if_not_exists:
+            print(f"📝 Creating new collection: {collection_name}")
+            collection = client.create_collection(
+                name=collection_name,
+                embedding_function=embedding_function,
+                metadata={"description": "Competitive intelligence documents"}
+            )
+            return collection
+        else:
+            raise e
+
+
+'''
+temporarily deprecated trying new code
 def get_competitor_collection(client, create_if_not_exists=True):
     """
     Get or create the competitor collection with proper error handling.
@@ -50,7 +81,7 @@ def get_competitor_collection(client, create_if_not_exists=True):
             return collection
         else:
             raise e
-
+'''
 def reset_collection(client):
     """
     Reset the collection (useful if you want to start fresh).

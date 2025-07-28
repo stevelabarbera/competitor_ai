@@ -1,5 +1,3 @@
-# ingestion/semantic/memory_safe_ingester.py
-
 import os
 from typing import List, Tuple, Optional
 from pathlib import Path
@@ -8,8 +6,6 @@ import chromadb
 from ingestion.base_ingestion import BaseIngester
 from fixed_embedding_config import get_competitor_collection
 from chunk_filtering.quality_filter import QualityFilter
-from company_tagging_chunker import CompanyTagParser
-
 
 class MemorySafeCompanyIngester(BaseIngester):
     def __init__(self, chunkers, chroma_path="./chroma_db", quality_filter=True,
@@ -18,8 +14,6 @@ class MemorySafeCompanyIngester(BaseIngester):
         self.batch_size = batch_size
         self.reset = reset
         self.client = chromadb.PersistentClient(path=chroma_path)
-        self.company_parser = CompanyTagParser()
-        self.company_parser.load()
 
     def clean_metadata(self, metadata: dict) -> dict:
         safe = {}
@@ -48,7 +42,13 @@ class MemorySafeCompanyIngester(BaseIngester):
                 filter = QualityFilter(min_words=50)
                 chunks = filter.filter(chunks)
 
-            company_id = self.company_parser.identify_company(content) or "general"
+            # Extract company from metadata
+            company_id = "general"
+            for _, meta in chunks:
+                if meta.get("company_normalized"):
+                    company_id = meta["company_normalized"]
+                    break
+
             collection = get_competitor_collection(self.client, collection_name=f"docs_{company_id}")
 
             batch = []
@@ -76,4 +76,3 @@ class MemorySafeCompanyIngester(BaseIngester):
             collection.add(documents=list(documents), metadatas=list(metadatas), ids=ids)
         except Exception as e:
             print(f"❌ Failed to ingest batch: {e}")
-wset()

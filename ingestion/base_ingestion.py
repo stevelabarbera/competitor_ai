@@ -5,6 +5,7 @@ from chunk_filtering.quality_filter import QualityFilter
 class BaseIngester(ABC):
     def __init__(self, chunkers, quality_filter=True):
         self.chunkers = chunkers
+        self.quality_filter = quality_filter
         self.filter = QualityFilter() if quality_filter else None
 
     @abstractmethod
@@ -47,3 +48,11 @@ class BaseIngester(ABC):
         except Exception as e:
             print(f"Failed to read PDF: {path} - {e}")
             return ""
+    
+    def apply_chunkers(self, content, filename):
+        chunks = []
+        for chunker in self.chunkers:
+            new_chunks = chunker(content, filename)
+            if new_chunks:
+                chunks.extend(new_chunks)
+        return chunks

@@ -4,6 +4,7 @@ import re
 from typing import List, Tuple, Dict, Set
 from domain_utils import extract_root_domain  # NEW
 
+
 def parse_company_tags(text: str) -> Tuple[str, Set[str]]:
     company_tags = set()
     company_pattern = r'^Company_Names:\s*(.+)$'
@@ -128,7 +129,7 @@ def get_company_summary(collection, company_name: str):
         total_chunks = len(results['metadatas'])
 
         for metadata in results['metadatas']:
-            if meta data:
+            if metadata:
                 ctype = metadata.get('content_type', 'unknown')
                 content_types[ctype] = content_types.get(ctype, 0) + 1
                 sources.add(metadata.get('source', 'unknown'))
