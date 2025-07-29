@@ -1,3 +1,4 @@
+#memory_safe_company_injester.py
 import os
 from typing import List, Tuple, Optional
 from pathlib import Path
@@ -8,11 +9,13 @@ from fixed_embedding_config import get_competitor_collection
 from chunk_filtering.quality_filter import QualityFilter
 
 class MemorySafeCompanyIngester(BaseIngester):
+    
     def __init__(self, chunkers, chroma_path="./chroma_db", quality_filter=True,
-                 batch_size=25, reset=False):
+                 batch_size=25, reset=False, delay_sec=0):
         super().__init__(chunkers, quality_filter)
         self.batch_size = batch_size
         self.reset = reset
+        self.delay_sec = delay_sec
         self.client = chromadb.PersistentClient(path=chroma_path)
 
     def clean_metadata(self, metadata: dict) -> dict:
@@ -68,6 +71,10 @@ class MemorySafeCompanyIngester(BaseIngester):
 
             if batch:
                 self.flush_batch(collection, batch)
+                #If a batch exists after flush go ahead insert a delay
+                if self.delay_sec:
+                    time.sleep(self.delay_sec)
+
 
     def flush_batch(self, collection, batch):
         try:
