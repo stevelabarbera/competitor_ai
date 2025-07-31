@@ -1,4 +1,4 @@
-# company_tagging_chunker.py
+# chunk_filtering/tagging.py
 # Normalizes company names to be used as keys in the keystore
 import re
 from typing import List, Tuple, Dict, Set

@@ -1,7 +1,7 @@
 # metadata_chunker.py
 from abc import ABC, abstractmethod
 from improved_chunker import extract_metadata_from_content, chunk_text_smart
-from company_tagging_chunker import parse_company_tags, normalize_company_name
+from company_metadata.tagging import parse_company_tags, normalize_company_name
 from typing import List, Tuple
 
 class MetadataChunker(ABC):

@@ -22,7 +22,8 @@ class BaseIngester(ABC):
             if isinstance(v, list):
                 sanitized[k] = ", ".join(map(str, v))
             else:
-                sanitized[k] = v
+                sanitized[k] = "" if v is None else v
+
         return sanitized
 
     def read_txt(self, path):

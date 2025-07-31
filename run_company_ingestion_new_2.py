@@ -3,7 +3,7 @@ import argparse
 from pathlib import Path
 
 from ingestion.semantic.memory_safe_company_ingester import MemorySafeCompanyIngester
-from company_metadata.tagging import chunk_text_with_company_context
+from metadata_chunker import CompanyChunker  # NEW
 
 BASE_DIR = Path(__file__).resolve().parent
 INTERNAL_DIR = BASE_DIR / "internal_documents"
@@ -40,14 +40,12 @@ def main():
     args = parse_arguments()
     print("\n🚀 Starting company-aware ingestion...")
 
-    chunker_fn = lambda content, filename: chunk_text_with_company_context(
-        content, filename, chunk_size=args.chunk_size, overlap=args.overlap
-    )
+    chunkers = [CompanyChunker]  # Class-based chunker
 
     ingester = MemorySafeCompanyIngester(
-        chunkers=[chunker_fn],
+        chunkers=chunkers,
         quality_filter=not args.no_filter,
-        batch_size=1,
+        batch_size=25,
         reset=args.reset_collection
     )
 
@@ -63,4 +61,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-aspo

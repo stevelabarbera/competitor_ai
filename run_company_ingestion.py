@@ -45,7 +45,7 @@ def main():
     ingester = MemorySafeCompanyIngester(
         chunkers=[chunker],
         quality_filter=not args.no_filter,
-        batch_size=25,
+        batch_size=5,
         reset=args.reset_collection
     )
 

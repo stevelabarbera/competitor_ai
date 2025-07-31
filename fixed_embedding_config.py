@@ -94,7 +94,7 @@ def reset_collection(client):
         client.delete_collection(name=collection_name)
         print(f"🗑️ Deleted collection: {collection_name}")
     except:
-        print(f"ℹ️ Collection {collection_name} didn't exist")
+        print(f"ℹ️ Collection {collecti,non_name} didn't exist")
     
     # Create fresh collection
     collection = get_competitor_collection(client, create_if_not_exists=True)
