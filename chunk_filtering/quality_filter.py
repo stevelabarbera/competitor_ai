@@ -11,10 +11,10 @@ class QualityFilter(BaseChunkFilter):
         self.boilerplate_signals = [
             "terms and conditions", "privacy policy", "copyright",
             "all rights reserved", "disclaimer", "agreement",
-            "legal notice", "cookie policy"
+            "legal snotice", "cookie policy"
         ]
 
-    def filter(self, chunks: List[Tuple[str, dict]]) -> List[Tuple[str, dict]]:
+    def chunk(self, chunks: List[Tuple[str, dict]]) -> List[Tuple[str, dict]]:
         """Apply filtering to remove short or boilerplate-like chunks."""
         result = []
 

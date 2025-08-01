@@ -31,6 +31,50 @@ class MemorySafeCompanyIngester(BaseIngester):
 
             chunks = self.apply_chunkers(content, filename)
             if self.filter:
+                chunks = self.filter.chunk(chunks)
+
+            company_collections = {}  # Cache of Chroma collections
+
+            for i, (text, meta) in enumerate(chunks):
+                if not isinstance(text, str) or len(text.strip()) < 30:
+                    continue
+
+                company_id = meta.get("company_normalized", "general")
+
+                if company_id not in company_collections:
+                    company_collections[company_id] = get_competitor_collection(
+                        self.client,
+                        collection_name=f"docs_{company_id}"
+                    )
+
+                meta.update({
+                    "source": filename,
+                    "chunk_index": i,
+                    "company": company_id
+                })
+
+                sanitized = self.sanitize_metadata(meta)
+                batch = [(text, sanitized)]
+
+                self.flush_batch(company_collections[company_id], batch)
+
+                if self.delay_sec:
+                    time.sleep(self.delay_sec)
+    '''
+
+    def ingest_documents_deprecated(self, files: List[Tuple[str, str, Optional[int]]]):
+        for filepath, filename, _priority in files:
+            if not os.path.exists(filepath):
+                continue
+
+            with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+
+            if len(content.strip()) < 50:
+                continue
+
+            chunks = self.apply_chunkers(content, filename)
+            if self.filter:
                 chunks = self.filter.filter(chunks)
 
             # Extract company from metadata
@@ -39,7 +83,6 @@ class MemorySafeCompanyIngester(BaseIngester):
                 if meta.get("company_normalized"):
                     company_id = meta["company_normalized"]
                     break
-
             collection = get_competitor_collection(self.client, collection_name=f"docs_{company_id}")
 
             batch = []
@@ -62,7 +105,7 @@ class MemorySafeCompanyIngester(BaseIngester):
 
             if batch:
                 self.flush_batch(collection, batch)
-
+    '''
     def flush_batch(self, collection, batch):
         try:
             documents, metadatas = zip(*batch)

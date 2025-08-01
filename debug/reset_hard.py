@@ -1,7 +1,7 @@
 # reset_hard.py
 import shutil
 import chromadb
-from embedding_config import get_shared_embedding_function
+from fixed_embedding_config import get_shared_embedding_function
 from pathlib import Path
 
 CHROMA_DIR = Path("./chroma_db")

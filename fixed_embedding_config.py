@@ -1,4 +1,4 @@
-# embedding_config.py
+# fixed_embedding_config.py
 from ollama_embed import OllamaEmbeddingFunction
 import chromadb
 

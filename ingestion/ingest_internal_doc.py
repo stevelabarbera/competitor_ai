@@ -175,7 +175,7 @@ def ingest_documents_from_directories(
             }
             
             # Get chunks with metadata
-            chunks_with_metadata = chunk_text_with_metadata(content, filename, chunk_size, overlap)
+            chunks_with_mbetadata = chunk_text_with_metadata(content, filename, chunk_size, overlap)
             
             print(f"  📊 Generated {len(chunks_with_metadata)} chunks")
             

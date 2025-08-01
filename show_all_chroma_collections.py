@@ -12,4 +12,12 @@ if __name__ == "__main__":
     names = list_chroma_collections()
     print("ChromaDB Collections:")
     for name in names:
-        print("  -", name)
+               # Get documents without any filters first
+        results = name.get(
+            limit=10,
+            include=['documents', 'metadatas']
+        )
+        
+        print(f"✅ Retrieved {len(results['ids'])} documents")
+        
+        print(f"Name: {name}, Count: {name.count()}, Data: {results['documents']}, Metadatas: {results['metadatas']} ")
