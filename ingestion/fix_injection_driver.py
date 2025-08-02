@@ -32,7 +32,7 @@ def main():
     args = parse_args()
     config = build_config(args)
 
-    chunkers = [DefaultChunker, CompanyChunker]
+    chunkers = [DefaultChunker(), CompanyChunker()]
     ingester_map = {
         "vector": VectorIngester(chunkers, quality_filter=not config.skip_filter),
         "keyword": KeywordIngester(chunkers, quality_filter=not config.skip_filter)

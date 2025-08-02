@@ -1,6 +1,6 @@
 # chunk_filter.metadata_chunker.py
 from abc import ABC, abstractmethod
-from improved_chunker import extract_metadata_from_content, chunk_text_smart
+from chunk_filtering.chunker import extract_metadata_from_content, chunk_text_smart
 from company_metadata.tagging import parse_company_tags, normalize_company_name
 from typing import List, Tuple
 
@@ -15,6 +15,10 @@ class MetadataChunker(ABC):
     def chunk(self) -> List[Tuple[str, dict]]:
         pass
 
+    def __call__(self, content: str, filename: str):
+        self.file_content = content
+        self.file_name = filename
+        return self.chunk()
 
 '''
 currently deprecated cleaner data no longer empty primary_company & all_companies in our ingestion dataset

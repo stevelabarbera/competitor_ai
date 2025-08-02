@@ -49,11 +49,12 @@ class BaseIngester(ABC):
         except Exception as e:
             print(f"Failed to read PDF: {path} - {e}")
             return ""
-    
+        
     def apply_chunkers(self, content, filename):
         chunks = []
-        for chunker in self.chunkers:
-            new_chunks = chunker(content, filename)
+        for chunker_class in self.chunkers:
+            chunker = chunker_class(filename, content)  # instantiate with the actual data
+            new_chunks = chunker()
             if new_chunks:
                 chunks.extend(new_chunks)
         return chunks

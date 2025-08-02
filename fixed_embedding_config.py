@@ -18,7 +18,7 @@ def get_shared_embedding_function():
     
     # You should manually check which model works best
     # For now, using your current setup but you should consider switching
-    model_name = "llama3"  # Change this to "nomic-embed-text" if you have it
+    model_name = "nomic-embed-text"  # Change this to "nomic-embed-text" if you have it
     
     print(f"🔧 Using embedding model: {model_name}")
     return OllamaEmbeddingFunction(model_name=model_name)

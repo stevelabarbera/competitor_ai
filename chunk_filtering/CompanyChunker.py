@@ -1,11 +1,13 @@
-#chunk_filter.CompanyChunker2.py
+#chunk_filter.CompanyChunker.py
 
 from abc import ABC, abstractmethod
-from improved_chunker import extract_metadata_from_content, chunk_text_smart
 from company_metadata.tagging import parse_company_tags, normalize_company_name
+from chunk_filtering.chunker import extract_metadata_from_content, chunk_text_smart
+from chunk_filtering.metadata_chunker import MetadataChunker
 from typing import List, Tuple
 
 class CompanyChunker(MetadataChunker):
+
     def chunk(self) -> List[Tuple[str, dict]]:
         cleaned_text, company_tags = parse_company_tags(self.file_content)
         if not cleaned_text.strip():
