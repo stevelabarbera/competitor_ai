@@ -1,9 +1,12 @@
 #chunk_filter.DefaultChunker.py
 from abc import ABC, abstractmethod
 from improved_chunker import extract_metadata_from_content, chunk_text_smart
-from company_metadata.tagging import parse_company_tags, normalize_company_name
 from typing import List, Tuple
+import logging
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class DefaultChunker(MetadataChunker):
     def chunk(self) -> List[Tuple[str, dict]]:
