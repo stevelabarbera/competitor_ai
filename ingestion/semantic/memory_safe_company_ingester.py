@@ -32,7 +32,7 @@ class MemorySafeCompanyIngester(BaseIngester):
             if not os.path.exists(filepath):
                 continue
             
-            logger.info("📁 Starting ingestion for: %s", filename)
+            logger.info("📁 Starting company ingestion for: %s", filename)
             with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
                 content = f.read()
 
@@ -46,7 +46,6 @@ class MemorySafeCompanyIngester(BaseIngester):
             if self.filter:
                 logger.info("🧹 Applying filter to chunks...", len(chunks))
                 chunks = self.filter.chunk(chunks)
-                logger.info("✅ Chunks remaining after filter: %d", len(chunks))
 
             
             logger.info("🔹 Chunking complete — %d chunks from: %s", len(chunks), filename)
@@ -54,6 +53,7 @@ class MemorySafeCompanyIngester(BaseIngester):
 
             for i, (text, meta) in enumerate(chunks):
                 if not isinstance(text, str) or len(text.strip()) < MIN_CONTENT_LENGTH:
+                    logger.info(f"Enumerating chunk of text and found it to be either not a string: '{isinstance(text,str)}' or less then the minimum defined content length {text.strip()} < {MIN_CONTENT_LENGTH}")
                     continue
 
                 company_id = meta.get("company_normalized", "unknown")

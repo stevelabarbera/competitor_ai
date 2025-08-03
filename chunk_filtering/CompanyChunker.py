@@ -6,10 +6,15 @@ from chunk_filtering.chunker import extract_metadata_from_content, chunk_text_sm
 from chunk_filtering.metadata_chunker import MetadataChunker
 from typing import List, Tuple
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 class CompanyChunker(MetadataChunker):
 
     def chunk(self) -> List[Tuple[str, dict]]:
         cleaned_text, company_tags = parse_company_tags(self.file_content)
+        logger.info(f"Starting company chunker finished pulling company_tags {company_tags} from parts_company_tags cleaned_text {cleaned_text}")
         if not cleaned_text.strip():
             return []
 

@@ -54,7 +54,7 @@ class BaseIngester(ABC):
         chunks = []
         for chunker_class in self.chunkers:
             chunker = chunker_class(filename, content)  # instantiate with the actual data
-            new_chunks = chunker()
+            new_chunks = chunker.chunk()
             if new_chunks:
                 chunks.extend(new_chunks)
         return chunks
