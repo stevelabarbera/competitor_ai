@@ -1,6 +1,11 @@
 #base_ingesture.py
 from abc import ABC, abstractmethod
 from chunk_filtering.quality_filter import QualityFilter
+import logging
+import os
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class BaseIngester(ABC):
     def __init__(self, chunkers, quality_filter=True):
@@ -32,7 +37,9 @@ class BaseIngester(ABC):
                 with open(path, "r", encoding=enc) as f:
                     result = f.read()
                     if isinstance(result, tuple):
+                        logger.info(f"Open the file {path} contents is instance of tuple and not text therefore taking the topfrom list")
                         result = result[0]
+
                     return result.strip()
             except UnicodeDecodeError:
                 continue
@@ -49,7 +56,11 @@ class BaseIngester(ABC):
         except Exception as e:
             print(f"Failed to read PDF: {path} - {e}")
             return ""
-        
+
+    def should_process_file(self,path, include_pdf, exclude_exts):
+        ext = os.path.splitext(path)[1].lower()
+        return ext == ".txt" or (ext == ".pdf" and include_pdf) if ext not in exclude_exts else False
+       
     def apply_chunkers(self, content, filename):
         chunks = []
         for chunker_class in self.chunkers:

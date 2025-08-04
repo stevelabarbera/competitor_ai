@@ -41,12 +41,12 @@ class QualityFilter(BaseChunkFilter):
 
             chunk_lower = text.lower()
             if any(signal in chunk_lower for signal in self.boilerplate_signals):
-                logger.info(f"Lowered the chunked text and found under boilerplate_signals skipping chunking process")
+                logger.info(f"Lowered the chunked text and found under boilerplate_signals skipping chunking process chunk_lower: chunk_lawyerit chunk_lower: {chunk_lower}")
                 continue
 
             # Optional: Normalize whitespace
             cleaned = "\n".join(line.strip() for line in text.splitlines() if line.strip())
-            logger.info(f"Chunk successfully pass to the quality filters aunt is getting any white space normalized before being added")
+            logger.info(f"Chunk successfully pass to the quality filters and is getting any white space normalized before being added")
             result.append((cleaned, metadata))
 
         return result

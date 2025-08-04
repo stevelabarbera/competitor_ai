@@ -1,5 +1,5 @@
 #chunk_filter.CompanyChunker.py
-
+import logging
 from abc import ABC, abstractmethod
 from company_metadata.tagging import parse_company_tags, normalize_company_name
 from chunk_filtering.chunker import extract_metadata_from_content, chunk_text_smart
@@ -14,16 +14,18 @@ class CompanyChunker(MetadataChunker):
 
     def chunk(self) -> List[Tuple[str, dict]]:
         cleaned_text, company_tags = parse_company_tags(self.file_content)
-        logger.info(f"Starting company chunker finished pulling company_tags {company_tags} from parts_company_tags cleaned_text {cleaned_text}")
+        logger.info(f"Starting company chunker finished pulling parse_company_tags {company_tags} from parts_company_tags cleaned_text {cleaned_text}")
         if not cleaned_text.strip():
             return []
 
         chunks = chunk_text_smart(cleaned_text, self.chunk_size, self.overlap)
+        logger.info(f"Parse the following chunk_text_smart: {chunks}")
         primary_company = None
         all_companies = list(company_tags)
 
         if company_tags:
             primary_company = all_companies[0]
+            logger.info(f"Found company tags assigning primary_company: {primary_company}")
 
         result = []
         for i, chunk in enumerate(chunks):
@@ -50,7 +52,7 @@ class CompanyChunker(MetadataChunker):
 
             if primary_company:
                 metadata["content_type"] = f"{metadata['content_type']}_{normalize_company_name(primary_company)}"
-
+            logger.info(f"Finished company chunker adding the following metadata and chunk to result\nmetadata: {metadata} \nchunk: {chunk}")           
             result.append((chunk, metadata))
 
         return result

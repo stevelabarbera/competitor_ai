@@ -13,7 +13,7 @@ import traceback
 from typing import List, Dict, Tuple
 from chunk_filtering.quality_filter import QualityFilter
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[1]
 CHROMA_DB_PATH = ROOT_DIR / "chroma_db"
 WHOOSH_INDEX_DIR = ROOT_DIR / "whoosh_index"
 FULL_CONTEXT_FILE = ROOT_DIR / "full_context.txt"
@@ -194,7 +194,7 @@ def get_source_label(path: str) -> str:
     elif path.startswith("internal_data/"):
         return "Internal Document"
     return "Unknown Source"
-
+'''
 def ask_enhanced(...):
     ...
     # Run the search and get results (chunks, metadatas, etc.)
@@ -217,7 +217,7 @@ def ask_enhanced(...):
         answer += label_summary
 
     return answer
-
+'''
 # Update your ask_enhanced function to pass company parameter
 def ask_enhanced(question: str, mode: str = "semantic", source_filter: str = None, 
                 company: str = None, use_reranking: bool = True, n_results: int = 10, 
@@ -313,7 +313,7 @@ def search_keyword_enhanced(question: str, n_results: int = 5):
         quality_chunks = quality_filter.filter(chunks)
 
         return filter_chunk_quality(quality_chunks)
-'''
+
 def ask_enhanced(question: str, mode: str = "semantic", source_filter: str = None, use_reranking: bool = True, n_results: int = 10, top_k: int = 5) -> str:
     try:
         if mode == "semantic":
@@ -397,7 +397,7 @@ ANSWER (based only on the context above):
         print("💥 Full traceback:")
         traceback.print_exc()
         return f"❌ Error during {mode} search: {e}"
-
+'''
 def ask(question: str, mode: str = "semantic") -> str:
     return ask_enhanced(question, mode=mode)
 

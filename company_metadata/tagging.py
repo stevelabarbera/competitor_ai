@@ -7,14 +7,14 @@ from domain_utils import extract_root_domain  # NEW
 
 def parse_company_tags(text: str) -> Tuple[str, Set[str]]:
     company_tags = set()
-    company_pattern = r'^Company_Names:\s*(.+)$'
+    company_pattern = r'^(Company_Names|Company_Data|company_name|customer_name):\s*(.+)$'
     lines = text.split('\n')
     cleaned_lines = []
 
     for line in lines:
         match = re.match(company_pattern, line.strip(), re.IGNORECASE)
         if match:
-            company_string = match.group(1)
+            company_string = match.group(2)
             companies = [c.strip() for c in company_string.split(',') if c.strip()]
             company_tags.update(companies)
             continue
@@ -25,12 +25,12 @@ def parse_company_tags(text: str) -> Tuple[str, Set[str]]:
     return cleaned_text, company_tags
 
 def normalize_company_name(name: str) -> str:
-    """(Deprecated in this context)"""
-    normalized = re.sub(r'[^\w\s]', '', name.lower())
-    normalized = re.sub(r'\s+', '_', normalized.strip())
-    normalized = re.sub(r'[^www_r]', '', normalized.strip())
+    normalized = re.sub(r'[^\w\s]', '', name.lower())       # remove punctuation
+    normalized = re.sub(r'\s+', '_', normalized.strip())    # replace spaces with underscores
+    normalized = re.sub(r'[^a-zA-Z0-9_]', '', normalized)   # remove anything not alphanumeric or underscore
     print(f'company_name: {name} -> normalized_company_name: {normalized}')
     return normalized
+
 
 def chunk_text_with_company_context(
     text: str,

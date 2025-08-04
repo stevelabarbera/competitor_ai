@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 #constants
 MIN_CONTENT_LENGTH = 20
-
+INCLUDE_PDF = True
 
 class MemorySafeCompanyIngester(BaseIngester):
     def __init__(self, chunkers, chroma_path="./chroma_db", quality_filter=True,
@@ -39,7 +39,10 @@ class MemorySafeCompanyIngester(BaseIngester):
             logger.info("📏 Measuring content size for: %s (%d chars)", filename, len(content.strip()))
             if len(content.strip()) < MIN_CONTENT_LENGTH:
                 continue
-   
+
+            if not self.should_process_file(filepath,INCLUDE_PDF,[]): 
+                logger.info(f"File {filename} will not be processed") 
+                continue
 
             chunks = self.apply_chunkers(content, filename)
             logger.info("✅ Chunkers have completed chunking content and have returned %d chunks.", len(chunks))
