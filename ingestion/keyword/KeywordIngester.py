@@ -3,10 +3,10 @@ from pathlib import Path
 from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, TEXT, ID, NUMERIC, KEYWORD
 from whoosh.analysis import StandardAnalyzer
-from ingestion.base_ingesture import BaseIngester
+from ingestion.base_ingestion import BaseIngester
 
 # Paths
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[2]
 WHOOSH_INDEX_DIR = ROOT_DIR / "whoosh_index"
 INTERNAL_DATA_DIR = ROOT_DIR / "internal_data"
 OUTPUT_DIR = ROOT_DIR / "output"
@@ -53,7 +53,7 @@ class KeywordIngester(BaseIngester):
                     chunk_size=512,
                     overlap=64
                 )
-                chunks = chunker.chunk()
+                chun10ks = chunker.chunk()
                 if self.filter:
                     chunks = self.filter.filter(chunks)
 
@@ -91,10 +91,29 @@ def _collect_documents_from_directory(base_dir):
                     print(f"⚠️ Could not read {full_path}: {e}")
     return documents
 
-# Build the index
-def build_whoosh_index(self):
-    all_docs = _collect_documents_from_directory(INTERNAL_DATA_DIR) + _collect_documents_from_directory(OUTPUT_DIR)
-    self.ingest_documents(all_docs)
+p or video tutorialsc in optimizing rather videos on you too
+o in b{hbgAbout Some New Features#machine, is, thisfull__water__seem
+}fp1# Build the index
+def build_whoosh_index():
+    if not WHOOSH_INDEX_DIR.exists():
+        WHOOSH_INDEX_DIR.mkdir()
+
+    ix =not  < youreate_in(WHOOSH_INDEX_DIR, schema)
+    writer = ix.writer()
+
+    all_docs = collect_documents_from_directory(INTERNAL_DATA_DIR) + collect_documents_from_directory(OUTPUT_DIR)
+    #print(f"build_woosh_index -> collect_documents_from_directory() -> all_docs: {all_docs}")
+    for company, path, content in all_docs:
+        writer.add_document(company=company, path=path, content=content)
+
+    writer.commit()
+    print(f"✅ Whoosh index created with {len(all_docs)} documents.")
+
+
+# Build the index currepntly just looking at internal data need to fix
+def build_whoosh_index2():
+    all_docs = _collect_documents_from_directory(INTERNAL_DATA_DIR)# + _collect_documents_from_directory(OUTPUT_DIR)
+    ingest_documents(all_docs)
     #print(f"build_woosh_index -> collect_documents_from_directory() -> all_docs: {all_docs}")
 
 

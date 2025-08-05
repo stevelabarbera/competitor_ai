@@ -7,7 +7,7 @@ from whoosh.analysis import StemmingAnalyzer
 from whoosh import index
 
 # Paths
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[2]
 WHOOSH_INDEX_DIR = ROOT_DIR / "whoosh_index"
 INTERNAL_DATA_DIR = ROOT_DIR / "internal_data"
 OUTPUT_DIR = ROOT_DIR / "output"
