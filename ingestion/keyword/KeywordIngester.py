@@ -1,4 +1,5 @@
 import os
+import logging
 from pathlib import Path
 from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, TEXT, ID, NUMERIC, KEYWORD
@@ -11,12 +12,18 @@ WHOOSH_INDEX_DIR = ROOT_DIR / "whoosh_index"
 INTERNAL_DATA_DIR = ROOT_DIR / "internal_data"
 OUTPUT_DIR = ROOT_DIR / "output"
 
-def extract_company_id(path: str) -> str:
-    parts = Path(path).parts
-    for part in parts:
-        if "_com" in part:
-            return part.replace("_com", "").replace("_", " ").lower()
-    return "unknown"
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('ingestion.log'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
+
 
 class KeywordIngester(BaseIngester):
     def __init__(self, chunkers, index_path="whoosh_index", quality_filter=True):
@@ -24,18 +31,10 @@ class KeywordIngester(BaseIngester):
         self.index_path = index_path
         self.ix = self._get_or_create_index()
 
-    def _get_or_create_index(self):
+    def _get_or_create_index(self,schema):
         if not os.path.exists(self.index_path):
             os.makedirs(self.index_path, exist_ok=True)
-            schema = Schema(
-                company=ID(stored=True),
-                path=ID(stored=True),
-                content=TEXT(analyzer=StandardAnalyzer(), stored=True),
-                chunk_index=NUMERIC(stored=True),
-                content_type=KEYWORD(stored=True),
-                mentioned_companies=TEXT(stored=True),
-                priority=NUMERIC(stored=True)
-            )
+
             return create_in(self.index_path, schema)
         return open_dir(self.index_path)
 
@@ -53,7 +52,7 @@ class KeywordIngester(BaseIngester):
                     chunk_size=512,
                     overlap=64
                 )
-                chun10ks = chunker.chunk()
+                chunks = chunker.chunk()
                 if self.filter:
                     chunks = self.filter.filter(chunks)
 
@@ -61,18 +60,13 @@ class KeywordIngester(BaseIngester):
                     if isinstance(chunk_text, tuple):
                         chunk_text = chunk_text[0]
                     if not isinstance(chunk_text, str) or not chunk_text.strip():
-                        continue
 
-                    writer.add_document(
-                        company=extract_company_id(filepath),
-                        path=filepath,
-                        content=chunk_text,
-                        chunk_index=i,
-                        content_type=metadata.get("content_type", ""),
-                        mentioned_companies=metadata.get("mentioned_companies", ""),
-                        priority=priority
-                    )
+                    writer.update_document(title=f"doc_{i}", content=chunk.strip())
+
+                    print(f"✅ Indexed {len(chunks)} keyword chunks into {self.index_path}")
+                    writer.add_document( )
         writer.commit()
+        print(f"✅ Whoosh index created with {len(all_docs)} documents.")
 
 
 # Document collector (from your existing logic)
@@ -91,23 +85,15 @@ def _collect_documents_from_directory(base_dir):
                     print(f"⚠️ Could not read {full_path}: {e}")
     return documents
 
-p or video tutorialsc in optimizing rather videos on you too
-o in b{hbgAbout Some New Features#machine, is, thisfull__water__seem
-}fp1# Build the index
-def build_whoosh_index():
+
+def get_whoosh_index():
     if not WHOOSH_INDEX_DIR.exists():
         WHOOSH_INDEX_DIR.mkdir()
 
-    ix =not  < youreate_in(WHOOSH_INDEX_DIR, schema)
-    writer = ix.writer()
+    #ix = create_in(WHOOSH_INDEX_DIR, schema)
+    #writer = ix.writer()
 
-    all_docs = collect_documents_from_directory(INTERNAL_DATA_DIR) + collect_documents_from_directory(OUTPUT_DIR)
-    #print(f"build_woosh_index -> collect_documents_from_directory() -> all_docs: {all_docs}")
-    for company, path, content in all_docs:
-        writer.add_document(company=company, path=path, content=content)
-
-    writer.commit()
-    print(f"✅ Whoosh index created with {len(all_docs)} documents.")
+    return all_docs = collect_documents_from_directory(INTERNAL_DATA_DIR) #+ collect_documents_from_directory(OUTPUT_DIR)
 
 
 # Build the index currepntly just looking at internal data need to fix

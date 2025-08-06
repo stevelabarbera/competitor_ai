@@ -1,3 +1,4 @@
+#search_engine.enhance_search_engine_claud.py
 import os
 import argparse
 
@@ -13,7 +14,7 @@ import traceback
 from typing import List, Dict, Tuple
 from chunk_filtering.quality_filter import QualityFilter
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[1]
 CHROMA_DB_PATH = ROOT_DIR / "chroma_db"
 WHOOSH_INDEX_DIR = ROOT_DIR / "whoosh_index"
 FULL_CONTEXT_FILE = ROOT_DIR / "full_context.txt"
@@ -39,6 +40,7 @@ def query_ollama(prompt: str) -> str:
         text=True
     )
     return result.stdout.strip()
+
 '''
 def llm_rerank_chunks(question: str, chunks: List[str], top_k: int = 5) -> List[str]:
     if len(chunks) <= top_k:
@@ -206,7 +208,7 @@ def debug_collection_content(question: str = "cybersecurity", n_results: int = 5
         print(f"Content preview: {doc[:200]}...")
         print(f"Word count: {len(doc.split())}")
 
-def search_keyword_enhanced(question: str, company: str = None, company_matching: str = "exact", n_results: int = 5):
+def search_keyword_enhanced_2(question: str, company: str = None, company_matching: str = "exact", n_results: int = 5):
     """Enhanced search with company filtering
     
     Args:

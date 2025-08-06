@@ -1,8 +1,10 @@
+#search_engine.enhanced_search_engine.py
 import os
 import argparse
 
 from pathlib import Path
 import chromadb
+import logging
 from chromadb.config import Settings
 from whoosh.index import open_dir
 from whoosh.qparser import QueryParser
@@ -19,11 +21,16 @@ WHOOSH_INDEX_DIR = ROOT_DIR / "whoosh_index"
 FULL_CONTEXT_FILE = ROOT_DIR / "full_context.txt"
 MODEL_CONFIG_FILE = ROOT_DIR / "config_model.txt"
 
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 def get_model_name():
     try:
         return MODEL_CONFIG_FILE.read_text().strip()
     except Exception as e:
-        print(f"⚠️ Could not read model config file: {e}")
+        logger.except(f"⚠️ Could not read model config file: {e}")
         return "llama3:instruct"
 
 client = chromadb.PersistentClient(path=str(CHROMA_DB_PATH))
@@ -39,36 +46,7 @@ def query_ollama(prompt: str) -> str:
         text=True
     )
     return result.stdout.strip()
-'''
-def llm_rerank_chunks(question: str, chunks: List[str], top_k: int = 5) -> List[str]:
-    if len(chunks) <= top_k:
-        return chunks
 
-    chunk_list = "\n".join([f"[{i}] {chunk[:200]}..." for i, chunk in enumerate(chunks)])
-    rerank_prompt = f"""
-You are helping to find the most relevant information to answer a question.
-
-Question: {question}
-
-Below are numbered text chunks. Return ONLY the numbers (0-{len(chunks)-1}) of the {top_k} most relevant chunks, in order of relevance. 
-Separate numbers with commas (e.g., "2,5,1,8,3").
-
-Chunks:
-{chunk_list}
-
-Most relevant chunk numbers:
-"""
-    try:
-        response = query_ollama(rerank_prompt)
-        indices = [int(x.strip()) for x in response.split(',') if x.strip().isdigit()]
-        indices = [i for i in indices if 0 <= i < len(chunks)][:top_k]
-        if not indices:
-            return chunks[:top_k]
-        return [chunks[i] for i in indices]
-    except Exception as e:
-        print(f"⚠️ Reranking failed: {e}, using original order")
-        return chunks[:top_k]
-'''
 def llm_rerank_chunks(question: str, chunks: List[Tuple[str, dict]], top_k: int = 5) -> List[Tuple[str, dict]]:
     if len(chunks) <= top_k:
         return chunks
@@ -89,20 +67,23 @@ Most relevant chunk numbers:
 """
     try:
         response = query_ollama(rerank_prompt)
+        logger.info(f"The response from query_ollama {response}")
         indices = [int(x.strip()) for x in response.split(',') if x.strip().isdigit()]
         indices = [i for i in indices if 0 <= i < len(chunks)][:top_k]
         if not indices:
             return chunks[:top_k]
         return [chunks[i] for i in indices]
     except Exception as e:
-        print(f"⚠️ Reranking failed: {e}, using original order")
-        return chunks[:top_k]
+        logger.exception(f"⚠️ Reranking failed: {e}, using original order")
+    logger.info(f"The chunks re ranked: {chunks}")
+    return chunks[:top_k]
 
 def filter_chunk_quality(chunks: List[str], min_words: int = 50) -> List[str]:
     quality_chunks = []
     for chunk in chunks:
         words = chunk.split()
         if len(words) < min_words:
+            logger.info(f"The words were < {min_words}  words: {words}")
             continue
         chunk_lower = chunk.lower()
         boilerplate_signals = [
@@ -111,7 +92,9 @@ def filter_chunk_quality(chunks: List[str], min_words: int = 50) -> List[str]:
             "legal notice", "cookie policy"
         ]
         if any(signal in chunk_lower for signal in boilerplate_signals):
+            longer.info(f"The boilerplate signals were a match in chunk_lower:{chunk_lower}")
             continue
+        logger.info(f"Successfully appending chunk to array {chunk}")   
         quality_chunks.append(chunk)
     return quality_chunks
 
@@ -124,7 +107,7 @@ def search_semantic_enhanced(question: str, n_results: int = 10, source_filter: 
         query_params["where"] = {"source": source_filter}
 
     results = collection.query(**query_params)
-    print("📦 Raw Chroma query result:", json.dumps(results, indent=2, default=str))
+    logger.info("📦 Raw Chroma query result:", json.dumps(results, indent=2, default=str))
 
     documents = results.get("documents", [[]])[0]
     metadatas = results.get("metadatas", [[]])[0]
@@ -136,11 +119,13 @@ def search_semantic_enhanced(question: str, n_results: int = 10, source_filter: 
 
     # Apply quality filter
     quality_filter = QualityFilter(min_words=50)
+    logger.info(f"Completed quality filter to the chunk {quality_filter}")
     filtered_pairs = []
     for chunk, meta in chunk_meta_pairs:
         if chunk.strip() and len(chunk.split()) >= quality_filter.min_words:
             if not any(signal in chunk.lower() for signal in quality_filter.boilerplate_signals):
                 cleaned = "\n".join(line.strip() for line in chunk.splitlines() if line.strip())
+                logger.info(f"The chunk worse not in the boilerplate_signals so cleaned and added")
                 filtered_pairs.append((cleaned, meta))
 
     if not filtered_pairs:
@@ -149,7 +134,7 @@ def search_semantic_enhanced(question: str, n_results: int = 10, source_filter: 
     # Rerank
     if use_reranking:
         filtered_pairs = llm_rerank_chunks(question, filtered_pairs, top_k=top_k)
-
+        logger.info(f"llm_rerank_chunks: {filtered_pairs}")
     return filtered_pairs
 
 def search_keyword_enhanced(question: str, company: str = None, n_results: int = 5):
