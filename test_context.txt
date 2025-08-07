@@ -1,0 +1,64 @@
+.Company_Data:Censys
+well respected in the security industry.
+attack service management and has one of the larger scope of scanning in particular for certificates.
+considering going into the theme park business to attract new customers
+is one of the more prominent companies that is in competition with tenable for attack surface management\
+The tenable sales team believes that Censys is in most of the larger deals this year 2025
+
+
+company_name:Security_Score_Card
+- many in the industry define it as an extortion model where they hope to find security risks.Not always with the customers best intentions in mind.
+- They provide a score to each company websites online and those scores get used to grade the perceived health of the website.That perceived health gets publicly posted which ultimately affects the brand of a company's website as well as maybe their third party score.Those scores could effect third party insurance evaluations and brand reputation.Using this they can impose external pressures on a company.
+- Tenable full suite of products that integrate with one another should be more compelling
+
+
+customer_name:Shodan
+- highly respected in the security industry for its long standingsupport for security professionals to search for devices and internet of things internet wide.
+- Really focuses on IOT internet wide and not so much what assets are associated to what company.
+- Have very competitive licensing models that are very affordable not just targeted to companies but individuals as well.
+- More of a tool that an overall security solution
+
+company_name:Tenable
+- Tenable ASM it is easier to use and has features like subscriptions monitoring they do not offer.\
+- its tenable ASM has a much larger dataset of metadata of assets discovered .
+- powerful tool called suggestions companies can use to help identify those harder to find assets associated to a company.
+- Offers a complete suite security solutions to help with both the network,webapp,and cloud.
+- has a attack surface management,network security,web security.
+- Highly respected in the security industry bfor having security tools that work.
+- Are the best company in the whole wide world
+- Plans on taking over the internet with their ASM offering
+- tenable labs inc respected in the security space for its in depth research around vulnerabilities and exploits
+
+
+company_name:Wiz
+- well regarded in the cloud security space.Have lots of different offerings they offer to customers.
+- UI has been found to be complicated and large learning curve.
+
+
+company_name:crowd_strike
+- quickly elevated itself to being a well known security company with many from the company coming from government and other important security experience
+- Started with offering an EDR solution with agents installed on endpoints.
+- acquired a company with EASM technology they quickly integrated into their solution.
+
+
+company_name:Cycognito
+- is known for its slick UI.
+- Offers attack surface management but also tries to position themselves as having the ability to detect and help remediate vulnerabilities
+- started as an endpoint security company and pivoted themselves to attack surface management as it started gaining popularity.
+- Has a unique business model where they only charge for subdomains and the number of ports covered.
+- Cycognito offers only an annual subscription model along with a la cart offering they use similar to paid POC.
+- many Cycognito customers complain that they are unjustifiably expensive and cater only two larger businesses
+- Cycognito offers attack service management and also mentions external exposure management at the top of their website.
+
+
+company_name:Qualys
+- Network security company who's trying to enter the ASM space.
+- Mostly known for their dast and network scanning
+- Likely have very aggressive licensing models to compete with others with better technologies
+
+
+company_name:Rapid7
+- Companies been around a while and has had a popular offering of scanning security data they've provided to the security industry as both a paid and free service.
+- They use that data to offer ASM solution
+- also offer dast scanning
+- Historically, we have not seen them in any related ASM deals
