@@ -23,7 +23,7 @@ def main():
         print(f"❌ Failed to read context: {e}")
         return
 
-    question = "Compare companies with attack surface management offerings."
+    question = "My colleagues and myself work for tenable network security In are in a number of different competitive proof of concepts with shodan and rapid7 as the primary competitors.Can you help build a battle card That can help us differentiate ourselves from the two companies.Both the prose and the cons so that we can fairly judge our responses accordingly."
 
     prompt = f"""
 You are a competitive intelligence assistant specializing in cybersecurity vendors. You have access to internal company documents and competitor analysis.
