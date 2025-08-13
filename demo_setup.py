@@ -6,8 +6,8 @@ import subprocess
 import gradio as gr
 
 DEFAULT_CONTEXT = Path("test_context.txt")  # or "full_context.txt"
-DEFAULT_MODEL = "llama3:8b"
-
+DEFAULT_MODEL = "llama3:8b"#all-manylm:latest, llama3:instruct, phi3:minic ,llama3:latest,mistral:7b,phi-4, gemma2(9b or 27b),deep seek 1.5b# 
+#aya23,llama3.23b,llama 3.1q8,mistral small 2501, qwen2.5,0.5b,1.5b,qwen2.5 3b,dolphin 3.8b,hermes llama 3.2 3b,nous hermes3.8b,Qwen2.5 14b,celeste 12bq8
 PRESET_QUESTIONS = [
     "Build a concise battlecard comparing Tenable vs Shodan and Rapid7. Include strengths/weaknesses and cite sources.",
     "List any competitive information about Censys related to attack surface management. Cite sources.",

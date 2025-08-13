@@ -13,7 +13,7 @@ def query_ollama(prompt: str, model: str) -> str:
         input=prompt,
         capture_output=True,
         text=True
-    )
+    )10
     return result.stdout.strip()
 
 def main():
