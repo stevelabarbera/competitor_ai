@@ -1,0 +1,9 @@
+llama3:8b
+llama3.2:latest
+mistral:7b
+llama3:instruct
+phi3:mini
+all-minilm:latest
+gemma3:1b
+falcon3:latest
+llama3:latest

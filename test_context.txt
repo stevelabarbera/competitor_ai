@@ -5,6 +5,58 @@ considering going into the theme park business to attract new customers
 is one of the more prominent companies that is in competition with tenable for attack surface management\
 The tenable sales team believes that Censys is in most of the larger deals this year 2025
 
+Company_Data:Censys
+
+- well respected in the security industry.
+- attack service management and has one of the larger scope of scanning in particular for certificates.
+- considering going into the theme park business to attract new customers
+- is one of the more prominent companies that is in competition with tenable for attack surface management\
+- The tenable sales team believes that Censys is in most of the larger deals this year 2025
+- Censys ASM claims to uncover up to 65% more of your attack surface than competitors 
+
+Their Attribution Engine improves accuracy of asset mapping—boosting visibility by up to 80% 
+Cybersecurity Excellence Awards
+
+
+They provide daily automated scanning, risk triage, remediation guidance, dashboards, cloud connectors, and rapid detection (within 24 hrs) 
+Cybersecurity Excellence Awards
+
+Integration with ServiceNow CMDB: auto-sync of discovered internet assets (hosts, buckets, certificates, domains) with accurate classification and frequent sync options. Requires enterprise license 
+ServiceNow Store
+
+
+Summary: Censys is positioning against traditional VM tools by offering unmatched discovery, attribution, threat prioritization, and seamless integration—all focused on external attack surface visibility.
+
+How Censys describes their Attack Surface Management (ASM):
+Censys ASM discovers, inventories, and monitors your entire Internet exposure. The external attack
+surface is assessed for risks and each is prioritized by what is important to you. An outside-in view, or
+attacker’s perspective, of every asset and exposure is refreshed daily, hourly, or on-demand giving
+your organization near-real time visibility and context so you can manage and communicate your
+cybersecurity posture
+
+Key Use Cases
+- Continuous Attack Surface Discovery
+-Cloud Exposure Management
+- Risk and Exposure Management
+- Subsidiaries, Acquisitions, And Mergers
+
+What They Say Are There Key Differentiators
+- Daily Asset Discovery - Achieve near real-time visibility with daily updates to your attack surface
+- Asset Inventory - Search across your attack surface data with the agility and accuracy of a threat
+- Cloud Connectors- Get total visibility in the cloud and keep up with changes by the hour
+- Rapid Response - Understand your overall exposure to Zero-day and headline vulnerabilities in minutes
+- Click to Re Scan - Rescan any asset for its known services to “trust but verify” remediation work has
+- logbook - Keep track of 2 years of changes to each asset, or your attack surface as a whole 
+- end to end customer control - Manage every data point in your attack surface without filing support tickets or billing
+professional services hours 
+
+
+ABOUT
+For security pros who protect the organization, Censys is the best at finding exposures attack-
+ers will exploit. Our industry-leading Internet scanning platform and >9.1B certificate database
+(the world’s largest) enable us to provide 63% more service coverage than our nearest com-
+petitors. Founded by the creators of ZMap, at Censys we’ve made it our mission to make the
+Internet a more secure place for everyone.
 
 company_name:Security_Score_Card
 - many in the industry define it as an extortion model where they hope to find security risks.Not always with the customers best intentions in mind.
@@ -17,6 +69,12 @@ customer_name:Shodan
 - Really focuses on IOT internet wide and not so much what assets are associated to what company.
 - Have very competitive licensing models that are very affordable not just targeted to companies but individuals as well.
 - More of a tool that an overall security solution
+
+What They Say Are There Key Differentiators
+- They Have Free and Paid offerings
+- Have been doing discovery for the longest
+- work with academiato help push technology
+- have earned the trust of security professionals offer as a tool
 
 company_name:Tenable
 - Tenable ASM it is easier to use and has features like subscriptions monitoring they do not offer.\

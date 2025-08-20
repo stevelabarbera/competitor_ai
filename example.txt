@@ -29,3 +29,4 @@ Their pricing starts at $2,500 per year for 100 assets. Key features include:
 - Compliance reportin
 
 Compared to competitors like Qualys and Rapid7, Tenable focuses more on asset discovery.
+ollama export llama2:7b ../../testing/myLlama-7b.ollamabundle5
